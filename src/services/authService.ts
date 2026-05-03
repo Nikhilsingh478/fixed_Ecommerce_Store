@@ -9,12 +9,14 @@ export interface AuthUser {
 }
 
 export const login = async (email: string, password: string): Promise<AuthUser> => {
+  console.log("LOGIN REQUEST:", { emailId: email, password });
   const response = await apiClient.post(API_ENDPOINTS.login, null, {
     headers: {
       emailId: email,
       password,
     },
   });
+  console.log("LOGIN RESPONSE:", response);
 
   const user: AuthUser = response.data;
   localStorage.setItem("emailId", email);
