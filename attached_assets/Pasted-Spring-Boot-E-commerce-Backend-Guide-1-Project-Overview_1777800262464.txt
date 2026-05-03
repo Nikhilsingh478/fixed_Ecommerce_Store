@@ -1,0 +1,496 @@
+Spring Boot E-commerce Backend Guide
+1. Project Overview
+Tech stack
+Spring Boot 2.7.5
+Java 11
+Spring Web
+Spring Data JPA / Hibernate
+Spring Validation
+PostgreSQL
+Embedded Tomcat
+Architecture
+Controller → Service → DAO → Entity
+Data access is mostly custom EntityManager-based DAO code
+Responses are usually direct entities or simple booleans/strings
+Request flow
+Frontend sends request with required headers
+Controller authenticates using emailId and password
+Service layer performs business logic
+DAO layer reads/writes entities
+Controller returns JSON, boolean, string, or status code
+2. Authentication System
+This backend does not use JWT. It uses header-based authentication on almost every protected request.
+
+Login endpoint
+POST /ecommerce/login
+
+Required headers
+emailId
+password
+Response
+200 OK with ApplicationUser JSON when valid
+403 FORBIDDEN when invalid
+The returned user object has password cleared before being sent back.
+
+How auth works
+authenticateUserNonActive(emailId, password) is used for login and general authenticated requests
+authenticateUser(emailId, password) is used for admin-restricted actions
+If authentication fails, controllers usually return 403 FORBIDDEN or null.
+
+3. User Management
+Is signup implemented?
+Yes, a user creation endpoint exists.
+
+Is there a /signup endpoint?
+No. There is no /signup route.
+
+How users are created
+Users are created through:
+
+POST /ecommerce/applicationuser
+So frontend should not look for signup; it should use this endpoint.
+
+POST /ecommerce/applicationuser
+Body: ApplicationUser Response:
+
+200 OK with true on success
+409 CONFLICT if email/mobile already exists
+500 INTERNAL_SERVER_ERROR if insert fails
+4. API Endpoints (actual only)
+AUTH / USER
+POST /ecommerce/login
+Headers:
+
+emailId
+password
+Body: none Response: ApplicationUser or 403
+
+POST /ecommerce/applicationuser
+Headers: none Body: ApplicationUser Response: boolean / conflict
+
+GET /ecommerce/applicationuser
+Headers:
+
+emailId
+password
+Response: list of users for admin only
+
+PATCH /ecommerce/activate
+Headers:
+
+emailId
+password
+userIdToActivate
+Response: updated user or 403
+
+CATEGORY FLOW
+POST /ecommerce/primarycategory
+Headers:
+
+emailId
+password
+Body: PrimaryCategory Response: created category
+
+GET /ecommerce/primarycategory
+Headers:
+
+emailId
+password
+pageNumber optional
+Response: list of PrimaryCategoryImage
+
+GET /ecommerce/allprimarycategory
+Headers:
+
+emailId
+password
+Response: list of PrimaryCategory
+
+POST /ecommerce/primarycategoryimage
+Headers:
+
+emailId
+password
+primaryCategoryId
+Body: PrimaryCategoryImage Response: boolean
+
+PATCH /ecommerce/primarycategory
+Headers:
+
+emailId
+password
+primaryCategoryId
+Body: PrimaryCategory Response: updated category
+
+PATCH /ecommerce/primarycategoryimage
+Headers:
+
+emailId
+password
+primaryCategoryImageId
+Body: PrimaryCategoryImage Response: updated image object
+
+GET /ecommerce/primarycategoryimage?primaryCategoryImageId=ID
+Public image fetch
+
+SUBCATEGORY FLOW
+POST /ecommerce/subcategory
+Headers:
+
+emailId
+password
+Body: SubCategoryImage Response: created subcategory
+
+GET /ecommerce/subcategory
+Headers:
+
+emailId
+password
+primaryCategoryId
+pageNumber
+Response: list of SubCategoryImage
+
+GET /ecommerce/allsubcategory
+Headers:
+
+emailId
+password
+Response: list of SubCategory
+
+POST /ecommerce/subcategoryimage
+Headers:
+
+emailId
+password
+subCategoryId
+Body: SubCategoryImage Response: boolean
+
+PATCH /ecommerce/subcategory
+Headers:
+
+emailId
+password
+subCategoryId
+Body: SubCategory Response: updated subcategory
+
+PATCH /ecommerce/subcategoryimage
+Headers:
+
+emailId
+password
+subCategoryImageId
+Body: SubCategoryImage Response: updated image object
+
+GET /ecommerce/subcategoryimage?subCategoryImageId=ID
+Public image fetch
+
+PRODUCT FLOW
+POST /ecommerce/product
+Headers:
+
+emailId
+password
+Body: ProductImage Response: Product
+
+GET /ecommerce/product
+Headers:
+
+emailId
+password
+subCategoryId
+pageNumber
+Response: list of ProductImage
+
+GET /ecommerce/allproduct
+Headers:
+
+emailId
+password
+Response: list of Product
+
+PATCH /ecommerce/product
+Headers:
+
+emailId
+password
+productId
+Body: Product Response: updated product
+
+PATCH /ecommerce/productimage
+Headers:
+
+emailId
+password
+productImageId
+Body: ProductImage Response: updated image object
+
+GET /ecommerce/productimage?productImageId=ID
+Public image fetch
+
+SUBPRODUCT / CART / ORDER FLOW
+POST /ecommerce/subproduct
+Headers:
+
+emailId
+password
+Body: SubProduct Response: created subproduct
+
+GET /ecommerce/subproduct
+Headers:
+
+emailId
+password
+productId
+pageNumber
+Response: list of SubProductImage
+
+PATCH /ecommerce/subproduct
+Headers:
+
+emailId
+password
+subProductId
+Body: SubProduct Response: updated subproduct
+
+PATCH /ecommerce/subproductimage
+Headers:
+
+emailId
+password
+subProductImageId
+Body: SubProductImage Response: updated image object
+
+POST /ecommerce/addtocart
+Headers:
+
+emailId
+password
+Body: CartProduct Response: AddRemoveModel
+
+GET /ecommerce/viewcart
+Headers:
+
+emailId
+password
+Response: list of CartModel
+
+GET /ecommerce/checkout
+Headers:
+
+emailId
+password
+Response: CartCheckoutModel
+
+DELETE /ecommerce/removefromcart
+Headers:
+
+emailId
+password
+subProductId
+Response: AddRemoveModel
+
+POST /ecommerce/order
+Headers:
+
+emailId
+password
+cartId
+addressId
+Response:
+
+true on success
+string message if cart already ordered
+403 if auth fails
+GET /ecommerce/order
+Headers:
+
+emailId
+password
+pageNumber
+Response: list of EcommerceOrderSummaryModel
+
+GET /ecommerce/invoice
+Headers:
+
+emailId
+password
+orderId
+Response: EcommerceOrderCostSummaryModel
+
+GET /ecommerce/orderdetails
+Headers:
+
+emailId
+password
+orderId
+Response: EcommerceOrderCostSummaryModel
+
+PATCH /ecommerce/changeorderstatus
+Headers:
+
+emailId
+password
+orderId
+statusId
+Response: boolean
+
+PATCH /ecommerce/cancelorder
+Headers:
+
+emailId
+password
+orderId
+Response: boolean
+
+ADDRESS
+POST /ecommerce/address
+Headers:
+
+emailId
+password
+Body: Address Response: boolean
+
+GET /ecommerce/address
+Headers:
+
+emailId
+password
+Response: list of Address
+
+ADMIN LOOKUP ENDPOINTS
+POST /ecommerce/adduserrole
+Headers:
+
+emailId
+password
+Body: UserRole Response: boolean
+
+POST /ecommerce/brand
+Headers:
+
+emailId
+password
+Body: Brand Response: true/false
+
+GET /ecommerce/brand
+Headers:
+
+emailId
+password
+Response: list of Brand
+
+POST /ecommerce/keyword
+Headers:
+
+emailId
+password
+Body: Keyword Response: boolean
+
+PATCH /ecommerce/keyword
+Headers:
+
+emailId
+password
+keywordId
+Body: Keyword Response: boolean
+
+GET /ecommerce/keyword
+Headers:
+
+emailId
+password
+Response: list of Keyword
+
+POST /ecommerce/hsn
+Headers:
+
+emailId
+password
+Body: HSN Response: true/false
+
+GET /ecommerce/hsn
+Headers:
+
+emailId
+password
+Response: list of HSN
+
+POST /ecommerce/orderstatus
+Headers:
+
+emailId
+password
+Body: OrderStatus Response: created order status
+
+GET /ecommerce/orderstatus
+Headers:
+
+emailId
+password
+Response: list of OrderStatus
+
+5. Data Structure
+Category hierarchy
+PrimaryCategory
+SubCategory
+Product
+SubProduct
+Important rule
+SubProduct is the real purchasable item. Cart actions use subProductId, not productId.
+
+Key IDs
+Primary category selection: primaryCategoryId
+Subcategory selection: subCategoryId
+Product grouping: productId
+Cart actions: subProductId
+Order placement: cartId, addressId
+6. Image System
+Images are stored as base64 in DB and also written to local files.
+
+Fetch endpoints
+/ecommerce/productimage?productImageId=ID
+/ecommerce/primarycategoryimage?primaryCategoryImageId=ID
+/ecommerce/subcategoryimage?subCategoryImageId=ID
+/ecommerce/loadapplicationuserimage?applicationUserImageId=ID
+Frontend URL construction
+Use the returned imagePath when present. If constructing manually, the endpoint is the base path plus the ID query parameter.
+
+7. Frontend Integration Guide
+Required pattern
+Every protected request must send headers. There is no token to store or refresh.
+
+Recommended axios setup
+axios.interceptors.request.use((config) => {
+  config.headers.emailId = emailId;
+  config.headers.password = password;
+  return config;
+});
+
+Actual UI flow
+Login with POST /ecommerce/login
+Load primary categories
+Load subcategories using primaryCategoryId
+Load products using subCategoryId
+Map SubProduct to actual buy/add-to-cart UI
+Add to cart using subProductId
+Checkout and place order using cartId + addressId
+8. Limitations / Design Flaws
+No JWT
+Header-based auth is non-standard
+No /signup endpoint
+User creation is separate from login
+Many filters/IDs are passed in headers, not path/query params
+Product hierarchy is nested and can be inefficient for frontend data fetching
+9. Recommended Improvements
+Add a real signup flow
+Add JWT or session auth
+Normalize API parameter passing
+Reduce reliance on headers for entity IDs
+Separate public catalog APIs from admin APIs more clearly
+10. Bottom Line
+A user gets into the system by:
+
+Creating an account with POST /ecommerce/applicationuser
+Logging in with POST /ecommerce/login
+Sending emailId and password headers on every protected request
+Frontend can integrate safely, but it must follow the backend’s header-based flow exactly.

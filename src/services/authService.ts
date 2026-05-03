@@ -28,19 +28,18 @@ export const login = async (email: string, password: string): Promise<AuthUser> 
 };
 
 export const signup = async (payload: {
-  fullname: string;
-  emailid: string;
-  mobilenumber: string;
+  name: string;
+  emailId: string;
+  mobileNumber: string;
   password: string;
-  userroleid?: number;
 }) => {
-  const response = await apiClient.post("/signup", payload, {
+  const response = await apiClient.post(
+    API_ENDPOINTS.applicationUser,
+    payload,
+    {
     skipAuth: true,
-    headers: {
-      emailId: payload.emailid,
-      password: payload.password,
-    },
-  } as any);
+    } as any,
+  );
   return response.data;
 };
 

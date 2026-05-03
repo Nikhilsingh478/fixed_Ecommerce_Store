@@ -6,6 +6,7 @@ export const BASE_URL =
 export const API_ENDPOINTS = {
   // Auth
   login: "/login",
+  applicationUser: "/applicationuser",
 
   // Products
   allProducts: "/allproduct",

@@ -1,0 +1,317 @@
+You are a senior React + TypeScript (Vite) frontend engineer.
+
+Your task is to FIX the e-commerce store frontend so that it correctly integrates with an EXISTING Spring Boot backend.
+
+This is NOT a redesign task.
+This is a STRICT backend-alignment task.
+
+---
+
+# 🚨 CRITICAL BACKEND RULES (MUST FOLLOW EXACTLY)
+
+The backend behaves as follows:
+
+1. NO /signup endpoint exists
+
+2. User creation endpoint:
+   POST /ecommerce/applicationuser
+
+3. Login endpoint:
+   POST /ecommerce/login
+
+4. Authentication is HEADER-BASED:
+   Every protected request MUST include:
+
+   * emailId
+   * password
+
+5. NO JWT, NO TOKEN SYSTEM
+
+6. Data structure:
+   primaryCategory → subCategory → product → subProduct
+
+7. subProductId is the ONLY valid ID for cart actions
+
+---
+
+# 🎯 YOUR GOAL
+
+Make the frontend FULLY WORKING with this backend.
+
+NO mock data
+NO assumptions
+NO fake flows
+
+---
+
+# 🔥 TASKS (FOLLOW STRICTLY)
+
+---
+
+## 1. FIX SIGNUP FLOW (CRITICAL)
+
+REMOVE any usage of:
+
+* /signup
+* fake timeout signup
+* dummy localStorage signup logic
+
+---
+
+### IMPLEMENT REAL SIGNUP
+
+Create API call:
+
+POST /ecommerce/applicationuser
+
+Body:
+
+{
+name,
+emailId,
+password,
+mobileNumber
+}
+
+---
+
+### AFTER SUCCESSFUL SIGNUP
+
+DO NOT auto-login.
+
+Instead:
+
+* Show success message
+* Redirect to /login
+
+---
+
+---
+
+## 2. FIX LOGIN FLOW (CRITICAL)
+
+Ensure login uses:
+
+POST /ecommerce/login
+
+IMPORTANT:
+
+* DO NOT send body
+* SEND credentials in HEADERS
+
+Example:
+
+api.post("/login", null, {
+headers: {
+emailId,
+password
+}
+})
+
+---
+
+### AFTER LOGIN SUCCESS
+
+Store in localStorage:
+
+* emailId
+* password
+* user object
+
+---
+
+### ADD LOGGING
+
+console.log("LOGIN RESPONSE:", response.data);
+
+---
+
+---
+
+## 3. FIX API CLIENT (GLOBAL)
+
+Ensure axios instance:
+
+* Automatically attaches:
+  emailId
+  password
+  Content-Type
+
+* Uses baseURL:
+  http://localhost:8080/ecommerce
+
+---
+
+### ADD INTERCEPTOR
+
+If response.status === 403:
+
+* clear localStorage
+* redirect to /login
+
+---
+
+---
+
+## 4. REMOVE ALL HARDCODED DATA
+
+STRICTLY REMOVE:
+
+* brands arrays
+* product mocks
+* fallback data
+* static categories
+
+Search entire project and DELETE them.
+
+---
+
+---
+
+## 5. FIX PRODUCT PIPELINE (VERY IMPORTANT)
+
+Implement proper chain:
+
+GET /primarycategory
+→ GET /subcategory (via primaryCategoryId)
+→ GET /product (via subCategoryId)
+
+---
+
+### MAP DATA
+
+Transform backend data into UI format:
+
+{
+id: subProductId,
+name: productName,
+price: sellingPrice,
+image: productImageList[0],
+category,
+subcategory
+}
+
+---
+
+### RULE
+
+ONLY subProduct is purchasable
+
+---
+
+---
+
+## 6. FIX IMAGE SYSTEM
+
+Use:
+
+/ecommerce/productimage?productImageId=ID
+
+---
+
+Create helper:
+
+getImage(id)
+
+Return:
+
+http://localhost:8080/ecommerce/productimage?productImageId=${id}
+
+---
+
+---
+
+## 7. FIX CART SYSTEM
+
+POST /addtocart
+
+Body:
+
+{
+subProduct: { id },
+quantity
+}
+
+---
+
+Ensure:
+
+product.id = subProductId
+
+---
+
+---
+
+## 8. ENSURE EVERYTHING IS BACKEND-DRIVEN
+
+After this:
+
+* UI must depend ONLY on API
+* If API returns empty → UI empty
+* NO fallback arrays
+
+---
+
+---
+
+## 9. DEBUG LOGGING (TEMPORARY)
+
+Add logs:
+
+console.log("Products:", products);
+console.log("Categories:", categories);
+
+---
+
+---
+
+## 10. FINAL VERIFICATION
+
+After implementation:
+
+Expected network flow:
+
+1. POST /applicationuser (signup)
+2. POST /login
+3. GET /primarycategory
+4. GET /subcategory
+5. GET /product
+
+---
+
+---
+
+# 🚫 STRICT RULES
+
+DO NOT:
+
+* create fake signup
+* auto-login after signup
+* hardcode any UI data
+* assume backend behavior
+* modify backend
+
+---
+
+# 🎯 FINAL EXPECTED RESULT
+
+User flow:
+
+1. Signup → creates user via backend
+2. Login → authenticates via headers
+3. App loads real data from backend
+4. Cart works using subProductId
+
+---
+
+# OUTPUT
+
+Provide updated:
+
+* authService.ts
+* apiClient.ts
+* useProducts.ts
+* Signup page
+* Login page
+
+Ensure code is clean, modular, and production-ready.
