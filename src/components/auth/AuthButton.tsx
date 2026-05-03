@@ -11,10 +11,12 @@ const AuthButton = ({
   disabled,
   children,
   className,
+  type = "button",
   ...props
 }: AuthButtonProps) => {
   return (
     <button
+      type={type}
       {...props}
       disabled={disabled || loading}
       className={cn(

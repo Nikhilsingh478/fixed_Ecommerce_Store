@@ -25,6 +25,7 @@ const Login = () => {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!validate()) return;
     setLoading(true);
     setErrors({});
