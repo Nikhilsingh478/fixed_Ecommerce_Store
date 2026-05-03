@@ -15,7 +15,7 @@ export interface Product {
   subcategory: string;
 }
 
-const mapProduct = (item: any, subCategoryId?: string | number, primaryCategoryId?: string | number): Product => {
+export const mapProduct = (item: any, subCategoryId?: string | number, primaryCategoryId?: string | number): Product => {
   const subProduct = item.subProduct ?? item;
   const imageId = item.productImageList?.[0]?.id ?? item.productImageList?.[0]?.productImageId ?? item.productImageId ?? null;
 
