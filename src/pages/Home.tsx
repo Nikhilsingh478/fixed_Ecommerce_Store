@@ -13,7 +13,7 @@ import banner3 from "@/assets/banner3.webp";
 
 const bannerImages = [banner1, banner2, banner3];
 
-const CategorySection = ({ category, idx }: { category: any, idx: number }) => {
+const CategorySection = ({ category, idx }: { category: any; idx: number }) => {
   const subcategories = useSubCategories(category.primaryCategoryId);
   if (!subcategories || subcategories.length === 0) return null;
   return (
@@ -39,13 +39,10 @@ const Home = () => {
       <Header />
 
       <main className="flex-1 w-full mx-auto max-w-7xl md:px-6 lg:px-8">
-
-        {/* Hero Carousel */}
         <div className="mt-0 animate-fade-in">
           <Carousel images={bannerImages} />
         </div>
 
-        {/* Sections */}
         <div className="flex flex-col gap-10 mt-8 md:gap-14 md:mt-12 pb-8">
           {categories.map((cat: any, idx: number) => (
             <CategorySection key={cat.primaryCategoryId} category={cat} idx={idx} />

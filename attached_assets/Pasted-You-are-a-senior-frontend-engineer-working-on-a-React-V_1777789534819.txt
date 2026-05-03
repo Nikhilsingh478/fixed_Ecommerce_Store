@@ -1,0 +1,217 @@
+You are a senior frontend engineer working on a React (Vite + TypeScript) e-commerce frontend that integrates with a Spring Boot backend.
+
+The application is currently BROKEN in the following ways:
+
+CRITICAL ISSUES:
+
+1. The app loads directly into the homepage WITHOUT requiring login.
+2. No API calls are being triggered (Network tab shows 0 requests).
+3. UI is showing hardcoded dummy data instead of backend data.
+4. Authentication headers are optional instead of enforced.
+5. localStorage keys are inconsistent (emailId vs userEmail, password vs userPassword).
+6. Product fetching logic is either not executing or not connected to UI.
+7. Backend requires authentication headers for EVERY request.
+
+Your goal is to FIX the frontend so that:
+
+* Login is mandatory before accessing the app
+* All API calls are properly triggered
+* Dummy data is completely removed
+* Backend integration works correctly
+
+---
+
+# 🔧 STEP-BY-STEP TASKS (FOLLOW STRICTLY)
+
+---
+
+## 1. FIX AUTH ENFORCEMENT (MOST IMPORTANT)
+
+File: src/services/apiClient.ts
+
+Tasks:
+
+1. Modify axios request interceptor:
+
+   * Read credentials ONLY from:
+     localStorage.getItem("emailId")
+     localStorage.getItem("password")
+
+2. Enforce authentication strictly:
+   IF emailId OR password is missing:
+
+   * redirect to /login
+   * block the request using Promise.reject
+
+3. Always attach headers:
+   emailId
+   password
+   Content-Type: application/json
+
+4. Remove any fallback logic like:
+   userEmail
+   userPassword
+
+---
+
+## 2. FIX RESPONSE INTERCEPTOR
+
+In apiClient.ts:
+
+* If response.status === 403:
+
+  * clear ALL auth-related localStorage keys
+  * redirect to /login
+
+---
+
+## 3. FIX LOGIN IMPLEMENTATION
+
+Locate login logic (Login.tsx or authService):
+
+Tasks:
+
+1. Send login request:
+   POST /ecommerce/login
+
+2. IMPORTANT:
+   Send emailId and password in HEADERS (NOT BODY)
+
+3. On success:
+
+   * store emailId in localStorage
+   * store password in localStorage
+   * store user object
+
+4. Redirect to homepage after login
+
+---
+
+## 4. REMOVE ALL DUMMY DATA
+
+Search entire codebase for:
+
+* hardcoded arrays like:
+  const brands = [...]
+  const products = [...]
+
+Tasks:
+
+1. Remove or comment out ALL dummy data
+2. Replace with API-driven data
+3. If data not loaded:
+   show loading state instead
+
+---
+
+## 5. FIX PRODUCT FETCHING PIPELINE
+
+File: src/hooks/useProducts.ts
+
+Tasks:
+
+1. Ensure useEffect is triggering API calls
+
+2. Implement full pipeline:
+
+   * GET /primarycategory
+   * For each → GET /subcategory (with primaryCategoryId header)
+   * For each → GET /product (with subCategoryId header)
+
+3. Map backend response to frontend format:
+
+{
+id: subProductId,
+name: productName,
+price: sellingPrice,
+image: first productImageList id,
+brand: brandName,
+category: primaryCategoryName,
+subcategory: subCategoryName
+}
+
+4. Add safe null checks:
+   productImageList?.[0]?.id
+
+5. Cache results in memory (avoid duplicate calls)
+
+---
+
+## 6. ENSURE PRODUCTS ARE USED IN UI
+
+File: ProductListing.tsx / Home.tsx
+
+Tasks:
+
+1. Ensure useProducts() is being called
+2. Ensure returned products are rendered
+3. Remove any fallback or mock data
+
+---
+
+## 7. FIX IMAGE HANDLING
+
+File: imageHelper.ts
+
+Tasks:
+
+1. Use environment variable:
+   import.meta.env.VITE_API_URL
+
+2. Create helper:
+   getProductImage(id)
+
+Return:
+`${BASE_URL}/productimage?productImageId=${id}`
+
+3. Add fallback image if id is missing
+
+---
+
+## 8. VERIFY API BASE URL
+
+Ensure:
+
+baseURL = import.meta.env.VITE_API_URL
+
+If not set:
+fallback = "http://localhost:8080/ecommerce"
+
+---
+
+## 9. FINAL VALIDATION
+
+After fixes:
+
+Expected behavior:
+
+1. App opens → redirects to /login
+2. After login → homepage loads
+3. Network tab shows:
+
+   * /primarycategory
+   * /subcategory
+   * /product
+4. Products render dynamically
+5. No hardcoded UI data remains
+
+---
+
+# 🚫 DO NOT
+
+* Do NOT modify backend
+* Do NOT introduce new architecture
+* Do NOT use JWT
+* Do NOT keep dummy fallback data
+
+---
+
+# 🎯 FINAL GOAL
+
+Make the frontend:
+✔ Fully dependent on backend
+✔ Auth enforced
+✔ Dynamic data only
+✔ No silent failures
+
+Output updated files with clean, production-ready code.

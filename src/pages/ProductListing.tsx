@@ -36,25 +36,25 @@ const ProductListing = () => {
     }
 
     if (filters.Category?.length) list = list.filter((p) => filters.Category.includes(p.category));
-    if (filters.Brand?.length)    list = list.filter((p) => filters.Brand.includes(p.brand));
+    if (filters.Brand?.length) list = list.filter((p) => filters.Brand.includes(p.brand));
     if (filters.Discount?.length) {
-      const min = Math.min(...filters.Discount.map(d => parseInt(d)));
-      list = list.filter(p => p.discount >= min);
+      const min = Math.min(...filters.Discount.map((d) => parseInt(d)));
+      list = list.filter((p) => p.discount >= min);
     }
     if (filters.Price?.length) {
-      list = list.filter(p => filters.Price.some(b => {
-        if (b === "Under ₹100")    return p.offerPrice < 100;
-        if (b === "₹100 - ₹300")  return p.offerPrice >= 100 && p.offerPrice <= 300;
-        if (b === "₹300 - ₹500")  return p.offerPrice > 300 && p.offerPrice <= 500;
-        if (b === "Above ₹500")   return p.offerPrice > 500;
+      list = list.filter((p) => filters.Price.some((b) => {
+        if (b === "Under ₹100") return p.offerPrice < 100;
+        if (b === "₹100 - ₹300") return p.offerPrice >= 100 && p.offerPrice <= 300;
+        if (b === "₹300 - ₹500") return p.offerPrice > 300 && p.offerPrice <= 500;
+        if (b === "Above ₹500") return p.offerPrice > 500;
         return false;
       }));
     }
 
     switch (sortValue) {
-      case "price-low":     list = [...list].sort((a, b) => a.offerPrice - b.offerPrice); break;
-      case "price-high":    list = [...list].sort((a, b) => b.offerPrice - a.offerPrice); break;
-      case "discount-low":  list = [...list].sort((a, b) => a.discount - b.discount); break;
+      case "price-low": list = [...list].sort((a, b) => a.offerPrice - b.offerPrice); break;
+      case "price-high": list = [...list].sort((a, b) => b.offerPrice - a.offerPrice); break;
+      case "discount-low": list = [...list].sort((a, b) => a.discount - b.discount); break;
       case "discount-high": list = [...list].sort((a, b) => b.discount - a.discount); break;
     }
     return list;
@@ -83,7 +83,6 @@ const ProductListing = () => {
     <div className="flex min-h-screen flex-col bg-background pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
       <div className="hidden md:block"><Header /></div>
 
-      {/* Mobile header */}
       <div className="md:hidden sticky top-0 z-40 flex items-center gap-3 bg-background dark:bg-[#0a0a0a] border-b border-border dark:border-[#1f1f1f] px-4 py-3.5">
         <button onClick={() => navigate(-1)} className="active:scale-90 transition-transform -ml-1">
           <ChevronLeft className="h-6 w-6 text-foreground" />
@@ -92,14 +91,11 @@ const ProductListing = () => {
       </div>
 
       <main className="flex-1 w-full mx-auto max-w-7xl md:px-6 lg:px-8 flex flex-col pt-0 md:pt-8 animate-fade-in">
-
-        {/* Desktop title */}
         <div className="hidden md:flex flex-col pb-6 border-b border-border mb-6">
           <h1 className="text-3xl font-semibold text-foreground capitalize tracking-tight">{title}</h1>
           <p className="text-muted-foreground mt-1.5 text-sm">{filtered.length} products found</p>
         </div>
 
-        {/* Action bar */}
         <div className="flex items-center justify-between px-4 md:px-0 py-3 md:py-0 md:mb-6">
           <p className="md:hidden text-[13px] text-muted-foreground">{filtered.length} items</p>
           <div className="flex items-center gap-2 ml-auto">
@@ -120,7 +116,6 @@ const ProductListing = () => {
           </div>
         </div>
 
-        {/* Loading skeleton */}
         {loading && (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 px-4 md:px-0">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -129,7 +124,6 @@ const ProductListing = () => {
           </div>
         )}
 
-        {/* Grid */}
         {!loading && (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 px-4 md:px-0">
             {filtered.map((p, i) => (

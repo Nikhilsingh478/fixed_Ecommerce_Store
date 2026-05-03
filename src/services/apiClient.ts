@@ -8,11 +8,22 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const emailId = localStorage.getItem("userEmail") || localStorage.getItem("emailId");
-  const password = localStorage.getItem("userPassword") || localStorage.getItem("password");
+  const emailId = localStorage.getItem("emailId");
+  const password = localStorage.getItem("password");
 
-  if (emailId) config.headers.emailId = emailId;
-  if (password) config.headers.password = password;
+  if (!emailId || !password) {
+    localStorage.removeItem("emailId");
+    localStorage.removeItem("password");
+    localStorage.removeItem("user");
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    return Promise.reject(new Error("Authentication required"));
+  }
+
+  config.headers.emailId = emailId;
+  config.headers.password = password;
+  config.headers["Content-Type"] = "application/json";
 
   return config;
 });
@@ -23,8 +34,6 @@ api.interceptors.response.use(
     if (error.response?.status === 403) {
       localStorage.removeItem("emailId");
       localStorage.removeItem("password");
-      localStorage.removeItem("userEmail");
-      localStorage.removeItem("userPassword");
       localStorage.removeItem("user");
       if (typeof window !== "undefined") {
         window.location.href = "/login";
