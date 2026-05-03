@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "@/components/auth/AuthLayout";
 import AuthInput from "@/components/auth/AuthInput";
 import AuthButton from "@/components/auth/AuthButton";
+import { signup } from "@/services/authService";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const mobileRegex = /^[0-9]{10}$/;
@@ -34,8 +35,7 @@ const Signup = () => {
     if (!form.emailid.trim()) next.emailid = "Email is required";
     else if (!emailRegex.test(form.emailid)) next.emailid = "Enter a valid email";
     if (!form.mobilenumber.trim()) next.mobilenumber = "Mobile number is required";
-    else if (!mobileRegex.test(form.mobilenumber))
-      next.mobilenumber = "Enter a valid 10-digit number";
+    else if (!mobileRegex.test(form.mobilenumber)) next.mobilenumber = "Enter a valid 10-digit number";
     if (!form.password) next.password = "Password is required";
     else if (form.password.length < 6) next.password = "Minimum 6 characters";
     setErrors(next);
@@ -48,10 +48,13 @@ const Signup = () => {
     setLoading(true);
     setErrors({});
     try {
-      // Backend signup endpoint not wired — UI-only success simulation.
-      // Payload prepared in backend-compatible shape:
-      // { fullname, emailid, mobilenumber, password, userroleid: 1 }
-      await new Promise((r) => setTimeout(r, 600));
+      await signup({
+        fullname: form.fullname.trim(),
+        emailid: form.emailid.trim(),
+        mobilenumber: form.mobilenumber.trim(),
+        password: form.password,
+        userroleid: 1,
+      });
       navigate("/login", { replace: true });
     } catch (err) {
       setErrors({
@@ -76,43 +79,10 @@ const Signup = () => {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-        <AuthInput
-          label="Full Name"
-          placeholder="John Doe"
-          autoComplete="name"
-          value={form.fullname}
-          onChange={update("fullname")}
-          error={errors.fullname}
-        />
-        <AuthInput
-          label="Email"
-          type="email"
-          placeholder="you@example.com"
-          autoComplete="email"
-          value={form.emailid}
-          onChange={update("emailid")}
-          error={errors.emailid}
-        />
-        <AuthInput
-          label="Mobile Number"
-          type="tel"
-          inputMode="numeric"
-          placeholder="10-digit number"
-          autoComplete="tel"
-          maxLength={10}
-          value={form.mobilenumber}
-          onChange={update("mobilenumber")}
-          error={errors.mobilenumber}
-        />
-        <AuthInput
-          label="Password"
-          type="password"
-          placeholder="At least 6 characters"
-          autoComplete="new-password"
-          value={form.password}
-          onChange={update("password")}
-          error={errors.password}
-        />
+        <AuthInput label="Full Name" placeholder="John Doe" autoComplete="name" value={form.fullname} onChange={update("fullname")} error={errors.fullname} />
+        <AuthInput label="Email" type="email" placeholder="you@example.com" autoComplete="email" value={form.emailid} onChange={update("emailid")} error={errors.emailid} />
+        <AuthInput label="Mobile Number" type="tel" inputMode="numeric" placeholder="10-digit number" autoComplete="tel" maxLength={10} value={form.mobilenumber} onChange={update("mobilenumber")} error={errors.mobilenumber} />
+        <AuthInput label="Password" type="password" placeholder="At least 6 characters" autoComplete="new-password" value={form.password} onChange={update("password")} error={errors.password} />
 
         {errors.form && (
           <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">

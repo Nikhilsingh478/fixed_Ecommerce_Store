@@ -20,15 +20,27 @@ export const login = async (email: string, password: string): Promise<AuthUser> 
     },
   );
 
-  console.log("Login API response:", response);
-
   const user: AuthUser = response.data;
-
   localStorage.setItem("emailId", email);
   localStorage.setItem("password", password);
   localStorage.setItem("user", JSON.stringify(user));
-
   return user;
+};
+
+export const signup = async (payload: {
+  fullname: string;
+  emailid: string;
+  mobilenumber: string;
+  password: string;
+  userroleid?: number;
+}) => {
+  const response = await apiClient.post("/signup", payload, {
+    headers: {
+      emailId: payload.emailid,
+      password: payload.password,
+    },
+  });
+  return response.data;
 };
 
 export const logout = (): void => {
