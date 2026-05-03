@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, SlidersHorizontal, RotateCcw, Check } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
-import { brands } from "@/data/brands";
 
 interface FilterDrawerProps {
   open: boolean;
@@ -41,9 +40,11 @@ const FilterDrawer = ({ open, onClose, onApply }: FilterDrawerProps) => {
 
   const categories = useCategories();
 
+  console.log("Categories from API:", categories);
+
   const getOptions = () => {
     if (activeTab === "Category") return categories.map((c: any) => ({ id: c.primaryCategoryId?.toString(), label: c.primaryCategoryName }));
-    if (activeTab === "Brand") return brands.map((b) => ({ id: b.name, label: b.name }));
+    if (activeTab === "Brand") return [];
     if (activeTab === "Discount") return discountOptions.map((d) => ({ id: d, label: d }));
     return priceOptions.map((p) => ({ id: p, label: p }));
   };
@@ -77,12 +78,10 @@ const FilterDrawer = ({ open, onClose, onApply }: FilterDrawerProps) => {
           opacity: visible ? 1 : 0,
         }}
       >
-        {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="h-1 w-10 rounded-full bg-muted-foreground/25" />
         </div>
 
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-3">
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 text-foreground" strokeWidth={2.2} />
@@ -101,9 +100,7 @@ const FilterDrawer = ({ open, onClose, onApply }: FilterDrawerProps) => {
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex flex-1 overflow-hidden border-t border-border">
-          {/* Left tabs */}
           <div className="flex w-28 shrink-0 flex-col border-r border-border bg-muted/40 overflow-y-auto">
             {filterTabs.map((tab) => {
               const count = tabCount(tab);
@@ -132,35 +129,37 @@ const FilterDrawer = ({ open, onClose, onApply }: FilterDrawerProps) => {
             })}
           </div>
 
-          {/* Right options */}
           <div className="flex-1 overflow-y-auto p-3">
-            <div className="flex flex-col gap-1.5">
-              {getOptions().map((opt) => {
-                const isChecked = (selected[activeTab] || []).includes(opt.id);
-                return (
-                  <button
-                    key={opt.id}
-                    onClick={() => toggle(activeTab, opt.id)}
-                    className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 text-left transition-all ${
-                      isChecked
-                        ? "bg-foreground text-background"
-                        : "bg-muted/50 text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    <span className="text-xs font-medium">{opt.label}</span>
-                    {isChecked && (
-                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-background/20">
-                        <Check className="h-2.5 w-2.5 text-background" strokeWidth={3} />
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+            {activeTab === "Brand" ? (
+              <div className="p-4 text-sm text-muted-foreground">No brand data available.</div>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                {getOptions().map((opt) => {
+                  const isChecked = (selected[activeTab] || []).includes(opt.id);
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => toggle(activeTab, opt.id)}
+                      className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 text-left transition-all ${
+                        isChecked
+                          ? "bg-foreground text-background"
+                          : "bg-muted/50 text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <span className="text-xs font-medium">{opt.label}</span>
+                      {isChecked && (
+                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-background/20">
+                          <Check className="h-2.5 w-2.5 text-background" strokeWidth={3} />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex gap-3 border-t border-border px-4 py-4">
           <button
             onClick={() => setSelected({})}
@@ -186,7 +185,6 @@ const FilterDrawer = ({ open, onClose, onApply }: FilterDrawerProps) => {
           </button>
         </div>
 
-        {/* Safe area */}
         <div className="h-safe-area-inset-bottom" />
       </div>
     </div>

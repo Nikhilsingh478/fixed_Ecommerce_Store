@@ -1,0 +1,154 @@
+You are a senior React engineer auditing and fixing an e-commerce frontend.
+
+This is NOT a normal task. This is a STRICT CODEBASE PURGE.
+
+---
+
+# 🚨 CRITICAL REQUIREMENT (NON-NEGOTIABLE)
+
+The application must be **100% backend-driven**.
+
+ZERO hardcoded UI data is allowed.
+
+If ANY static data exists, the task is considered FAILED.
+
+---
+
+# 🔍 FIRST: FULL CODEBASE AUDIT
+
+Search ENTIRE project for:
+
+* "Tata"
+* "Amul"
+* "Parle"
+* "Colgate"
+* "Maggi"
+* "Fortune"
+* "Aashirvaad"
+
+Also search for:
+
+* const brands =
+* const products =
+* const categories =
+* dummyData
+* mockData
+* fallbackData
+
+List ALL files where these appear.
+
+---
+
+# 🔥 SECOND: HARD DELETE (NO EXCEPTIONS)
+
+For EVERY occurrence:
+
+1. REMOVE the entire static array or object
+2. REMOVE imports of mock data
+3. REMOVE UI components depending on static data
+
+If something breaks:
+→ DO NOT reintroduce dummy data
+→ Replace with dynamic API data OR empty state
+
+---
+
+# 🧠 THIRD: REMOVE FALLBACK LOGIC
+
+Delete ALL patterns like:
+
+if (!data) return mockData;
+
+const data = apiData || dummyData;
+
+data ?? fallback
+
+These are STRICTLY forbidden.
+
+---
+
+# 🧱 FOURTH: FIX HOME PAGE (CRITICAL)
+
+The Home page must:
+
+❌ NOT render any "Popular Brands" grid from static data
+❌ NOT display any placeholder brands
+
+Instead:
+
+* Use API-driven categories/products
+* OR hide section completely if API not ready
+
+---
+
+# 🔄 FIFTH: ENSURE REAL DATA FLOW
+
+Verify:
+
+* Home → uses real API hooks
+* Product listing → uses useProducts()
+* Categories → from backend only
+* Cart → from backend only
+
+If ANY component is not using API:
+→ FIX IT
+
+---
+
+# 🧪 SIXTH: FORCE EMPTY STATE
+
+If backend returns nothing:
+
+* Show "No data available" OR loading
+* DO NOT show fake content
+
+---
+
+# 🧾 SEVENTH: ADD DEBUG LOGGING
+
+Add:
+
+console.log("Products from API:", products);
+console.log("Categories from API:", categories);
+
+---
+
+# 🚫 STRICT RULES
+
+DO NOT:
+
+* Add mock data
+* Add fallback arrays
+* Hardcode images or labels
+* Keep demo content
+* Keep brand placeholders
+
+---
+
+# ✅ FINAL VALIDATION
+
+After cleanup:
+
+1. UI must NOT show any known brand names unless from API
+2. If backend is OFF → UI should be EMPTY
+3. Network tab should be the ONLY source of truth
+
+---
+
+# 🎯 FINAL GOAL
+
+Transform system from:
+
+❌ Fake demo frontend
+
+TO:
+
+✅ Real backend-controlled frontend
+
+---
+
+Output:
+
+* List of all removed files/sections
+* Updated components
+* Confirmation that NO hardcoded data remains

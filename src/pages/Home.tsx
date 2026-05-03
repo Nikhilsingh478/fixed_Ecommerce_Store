@@ -33,6 +33,8 @@ const CategorySection = ({ category, idx }: { category: any; idx: number }) => {
 const Home = () => {
   const categories = useCategories();
 
+  console.log("Categories from API:", categories);
+
   return (
     <div className="flex min-h-screen flex-col bg-background pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
       <Header />
