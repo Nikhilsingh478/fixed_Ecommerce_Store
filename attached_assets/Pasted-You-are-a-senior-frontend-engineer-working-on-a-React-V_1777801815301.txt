@@ -1,0 +1,221 @@
+You are a senior frontend engineer working on a React (Vite + TypeScript) e-commerce store.
+
+Your job is to FIX the frontend so it works EXACTLY with an existing Spring Boot backend.
+
+---
+
+# 🚨 CURRENT SITUATION (READ CAREFULLY)
+
+We have already debugged multiple layers.
+
+### ✅ WORKING
+
+* Backend is running (Spring Boot, MySQL)
+* CORS is FIXED in backend
+* API base URL is correct → http://localhost:8080/ecommerce
+* Endpoint `/applicationuser` EXISTS and is correct
+* Login endpoint `/login` exists and uses headers (emailId, password)
+
+---
+
+### ❌ CURRENT PROBLEM
+
+Signup API is returning:
+
+→ **500 Internal Server Error**
+
+This is NOT random.
+
+We now KNOW the exact backend contract.
+
+The frontend is currently sending WRONG field names.
+
+---
+
+# 🧠 BACKEND CONTRACT (STRICT — DO NOT DEVIATE)
+
+## Signup Endpoint
+
+POST /ecommerce/applicationuser
+
+### Required JSON body:
+
+{
+"fullName": string,
+"emailId": string,
+"mobilenumber": string,
+"password": string,
+"shopName": string (optional)
+}
+
+---
+
+# 🚨 CRITICAL RULES
+
+Backend is EXTREMELY STRICT:
+
+* "fullName" → REQUIRED (NOT "name")
+* "mobilenumber" → REQUIRED (NOT "mobileNumber")
+* "emailId" → REQUIRED
+* "password" → REQUIRED
+
+---
+
+### ❌ DO NOT SEND:
+
+* userRole
+* createdDateTime
+* isActive
+* isPreminiumUser
+* subscriptionExpiryDateTime
+
+Backend sets these automatically.
+
+---
+
+# 🎯 YOUR TASKS
+
+---
+
+## 1. FIX SIGNUP PAYLOAD (CRITICAL)
+
+Find signup API call (likely in authService.ts)
+
+Fix payload mapping EXACTLY:
+
+form.name → fullName
+form.email → emailId
+form.phone → mobilenumber
+
+---
+
+### ✅ CORRECT IMPLEMENTATION
+
+const payload = {
+fullName: form.name,
+emailId: form.email,
+mobilenumber: form.phone,
+password: form.password,
+shopName: ""
+};
+
+await api.post("/applicationuser", payload);
+
+---
+
+## 2. ADD DEBUG LOGGING
+
+Before API call:
+
+console.log("Signup Payload:", payload);
+
+After response:
+
+console.log("Signup Response:", response);
+
+---
+
+## 3. REMOVE ANY FAKE SIGNUP LOGIC
+
+Search and REMOVE:
+
+* setTimeout based signup
+* mock success responses
+* localStorage-only signup
+* any fake "user created" logic
+
+Signup MUST hit backend ONLY.
+
+---
+
+## 4. ENSURE API CLIENT IS USED
+
+Signup MUST use shared axios instance (apiClient)
+
+Do NOT use fetch directly.
+
+---
+
+## 5. HANDLE RESPONSES PROPERLY
+
+Handle:
+
+### 200
+
+→ success → redirect to login
+
+### 409
+
+→ show: "User already exists"
+
+### 500
+
+→ show: "Invalid data or server error"
+
+---
+
+## 6. VERIFY NETWORK CALL
+
+After fix:
+
+You MUST see in browser network tab:
+
+POST /applicationuser
+
+Payload must match backend exactly.
+
+---
+
+## 7. DO NOT CHANGE BACKEND ASSUMPTIONS
+
+DO NOT:
+
+* rename fields
+* change endpoints
+* invent APIs
+
+Frontend must ADAPT to backend — NOT the other way around.
+
+---
+
+# 🚫 STRICT RULES
+
+* NO hardcoded/mock data
+* NO fallback signup
+* NO silent failures
+* NO fake success UI
+
+---
+
+# ✅ FINAL EXPECTED BEHAVIOR
+
+1. User fills signup form
+2. Clicks "Create Account"
+3. Network request is sent:
+   POST /applicationuser
+4. Backend responds:
+   → 200 → success
+   → 409 → duplicate
+5. UI reflects REAL backend response
+
+---
+
+# 🎯 GOAL
+
+Fix the LAST real issue:
+
+"Incorrect payload mapping causing 500 error"
+
+Do NOT over-engineer.
+
+Just FIX the payload and ensure real API call.
+
+---
+
+Output:
+
+* Updated authService.ts
+* Updated Signup component
+* Clean working flow
+
+NO EXPLANATION — ONLY CODE FIXES.

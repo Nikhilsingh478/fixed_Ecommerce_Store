@@ -11,7 +11,7 @@ const mobileRegex = /^[0-9]{10}$/;
 interface FormState {
   name: string;
   emailId: string;
-  mobileNumber: string;
+  phone: string;
   password: string;
 }
 
@@ -20,7 +20,7 @@ const Signup = () => {
   const [form, setForm] = useState<FormState>({
     name: "",
     emailId: "",
-    mobileNumber: "",
+    phone: "",
     password: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormState | "form", string>>>({});
@@ -34,8 +34,8 @@ const Signup = () => {
     if (!form.name.trim()) next.name = "Full name is required";
     if (!form.emailId.trim()) next.emailId = "Email is required";
     else if (!emailRegex.test(form.emailId)) next.emailId = "Enter a valid email";
-    if (!form.mobileNumber.trim()) next.mobileNumber = "Mobile number is required";
-    else if (!mobileRegex.test(form.mobileNumber)) next.mobileNumber = "Enter a valid 10-digit number";
+    if (!form.phone.trim()) next.phone = "Mobile number is required";
+    else if (!mobileRegex.test(form.phone)) next.phone = "Enter a valid 10-digit number";
     if (!form.password) next.password = "Password is required";
     else if (form.password.length < 6) next.password = "Minimum 6 characters";
     setErrors(next);
@@ -50,10 +50,11 @@ const Signup = () => {
     setErrors({});
     try {
       await signupUser({
-        name: form.name.trim(),
+        fullName: form.name.trim(),
         emailId: form.emailId.trim(),
-        mobileNumber: form.mobileNumber.trim(),
+        mobilenumber: form.phone.trim(),
         password: form.password,
+        shopName: "",
       });
       navigate("/login", { replace: true });
     } catch (err) {
@@ -81,7 +82,7 @@ const Signup = () => {
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <AuthInput label="Full Name" placeholder="John Doe" autoComplete="name" value={form.name} onChange={update("name")} error={errors.name} />
         <AuthInput label="Email" type="email" placeholder="you@example.com" autoComplete="email" value={form.emailId} onChange={update("emailId")} error={errors.emailId} />
-        <AuthInput label="Mobile Number" type="tel" inputMode="numeric" placeholder="10-digit number" autoComplete="tel" maxLength={10} value={form.mobileNumber} onChange={update("mobileNumber")} error={errors.mobileNumber} />
+        <AuthInput label="Mobile Number" type="tel" inputMode="numeric" placeholder="10-digit number" autoComplete="tel" maxLength={10} value={form.phone} onChange={update("phone")} error={errors.phone} />
         <AuthInput label="Password" type="password" placeholder="At least 6 characters" autoComplete="new-password" value={form.password} onChange={update("password")} error={errors.password} />
 
         {errors.form && (

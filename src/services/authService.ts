@@ -28,18 +28,15 @@ export const login = async (email: string, password: string): Promise<AuthUser> 
 };
 
 export const signup = async (payload: {
-  name: string;
+  fullName: string;
   emailId: string;
-  mobileNumber: string;
+  mobilenumber: string;
   password: string;
+  shopName?: string;
 }) => {
-  const response = await apiClient.post(
-    API_ENDPOINTS.applicationUser,
-    payload,
-    {
-    skipAuth: true,
-    } as any,
-  );
+  console.log("Signup Payload:", payload);
+  const response = await apiClient.post(API_ENDPOINTS.applicationUser, payload, { skipAuth: true } as any);
+  console.log("Signup Response:", response);
   return response.data;
 };
 
