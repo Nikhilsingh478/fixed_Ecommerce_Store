@@ -4,7 +4,6 @@ import Carousel from "@/components/Carousel/Carousel";
 import SectionGrid from "@/components/SectionGrid/SectionGrid";
 import { useCategories } from "@/hooks/useCategories";
 import { useSubCategories } from "@/hooks/useSubCategories";
-import { getProductImage } from "@/utils/imageHelper";
 
 import banner1 from "@/assets/banner1.webp";
 import banner2 from "@/assets/banner2.webp";
@@ -22,7 +21,7 @@ const CategorySection = ({ category, idx }: { category: any; idx: number }) => {
         items={subcategories.map((sub: any) => ({
           id: sub.subCategoryId?.toString(),
           name: sub.subCategoryName,
-          image: getProductImage(sub.productImageId),
+          image: "",
           link: `/category/${category.primaryCategoryId}/${sub.subCategoryId}`,
         }))}
       />

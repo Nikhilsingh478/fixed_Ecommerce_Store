@@ -36,12 +36,14 @@ const mapProduct = (item: any, subCategoryId?: string | number, primaryCategoryI
 export const useProducts = (primaryCategoryId?: number | string, subCategoryId?: number | string) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
 
     const fetchProducts = async () => {
       setLoading(true);
+      setError(null);
       try {
         const categoriesRes = await api.get("/primarycategory", {
           headers: { pageNumber: "1" },
@@ -95,9 +97,12 @@ export const useProducts = (primaryCategoryId?: number | string, subCategoryId?:
           console.log("Products:", mapped);
           setProducts(mapped);
         }
-      } catch (error) {
-        console.error("Failed to load products:", error);
-        if (active) setProducts([]);
+      } catch (err) {
+        console.error("Failed to load products:", err);
+        if (active) {
+          setProducts([]);
+          setError("Failed to load products");
+        }
       } finally {
         if (active) setLoading(false);
       }
@@ -110,5 +115,5 @@ export const useProducts = (primaryCategoryId?: number | string, subCategoryId?:
     };
   }, [primaryCategoryId, subCategoryId]);
 
-  return { products, loading };
+  return { products, loading, error };
 };

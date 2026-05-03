@@ -27,7 +27,7 @@ export function mapOrder(apiOrder: any) {
       return {
         product: {
           id: i.subProduct?.id?.toString() || i.subProduct?.subProductId?.toString() || "",
-          name: i.subProduct?.productName || i.subProduct?.name || "Product",
+          name: i.subProduct?.productName || i.subProduct?.name || "",
           price: i.sellingPricePerUnit || 0,
           offerPrice: i.sellingPricePerUnit || 0,
           image: getProductImage(imageId),

@@ -15,7 +15,7 @@ const ProductListing = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
 
-  const { products, loading: productsLoading } = useProducts(category, subcategory);
+  const { products, loading: productsLoading, error } = useProducts(category, subcategory);
   const { results: searchResults, loading: searchLoading } = useSearch(query);
 
   const loading = query ? searchLoading : productsLoading;
@@ -59,6 +59,14 @@ const ProductListing = () => {
   const rawTitle = query ? `"${query}"` : (subcategory || category || "All Products");
   const title = typeof rawTitle === "string" ? rawTitle.replace(/-/g, " ") : rawTitle;
 
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="min-h-screen flex items-center justify-center">No products</div>;
+  }
+
   const EmptyState = () => (
     <div className="flex min-h-screen flex-col bg-background">
       <div className="hidden md:block"><Header /></div>
@@ -73,7 +81,7 @@ const ProductListing = () => {
     </div>
   );
 
-  if (!loading && !rawProducts.length) return <EmptyState />;
+  if (!rawProducts.length) return <EmptyState />;
 
   return (
     <div className="flex min-h-screen flex-col bg-background pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
@@ -106,31 +114,18 @@ const ProductListing = () => {
           </div>
         </div>
 
-        {loading && (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 px-4 md:px-0">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="rounded-2xl bg-card border border-border animate-pulse aspect-[3/4]" />
-            ))}
-          </div>
-        )}
-
-        {!loading && (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 px-4 md:px-0">
-            {filtered.map((p, i) => (
-              <div key={p.id} className="animate-fade-up" style={{ animationDelay: `${Math.min(i * 40, 400)}ms` }}>
-                <ProductCard product={p} />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!loading && filtered.length === 0 && rawProducts.length > 0 && (
-          <div className="py-32 flex flex-col items-center justify-center text-center animate-fade-in">
-            <div className="h-16 w-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-4">
-              <SlidersHorizontal className="h-5 w-5 text-muted-foreground" strokeWidth={1.7} />
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 px-4 md:px-0">
+          {filtered.map((p, i) => (
+            <div key={p.id} className="animate-fade-up" style={{ animationDelay: `${Math.min(i * 40, 400)}ms` }}>
+              <ProductCard product={p} />
             </div>
-            <h3 className="text-base font-semibold text-foreground">No products match filters</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-[200px]">Try adjusting your filters</p>
+          ))}
+        </div>
+
+        {!filtered.length && (
+          <div className="py-32 flex flex-col items-center justify-center text-center animate-fade-in">
+            <h3 className="text-base font-semibold text-foreground">No products available</h3>
+            <p className="text-sm text-muted-foreground mt-1 max-w-[200px]">Backend returned no items</p>
           </div>
         )}
       </main>

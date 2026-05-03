@@ -12,7 +12,7 @@ export function mapCartItem(item: any) {
   return {
     product: {
       id: item.subProduct?.id?.toString() || item.subProduct?.subProductId?.toString() || "",
-      name: item.subProduct?.productName || item.subProduct?.name || "Product",
+      name: item.subProduct?.productName || item.subProduct?.name || "",
       price: item.sellingPricePerUnit || item.subProduct?.sellingPrice || 0,
       offerPrice: item.sellingPricePerUnit || item.subProduct?.sellingPrice || 0,
       mrp: item.subProduct?.mrp || item.sellingPricePerUnit || 0,
