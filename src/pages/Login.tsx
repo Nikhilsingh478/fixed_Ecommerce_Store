@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "@/components/auth/AuthLayout";
 import AuthInput from "@/components/auth/AuthInput";
 import AuthButton from "@/components/auth/AuthButton";
-import { login } from "@/services/authService";
+import api from "@/services/apiClient";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -23,18 +23,31 @@ const Login = () => {
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
+    console.log("Login clicked");
     if (!validate()) return;
     setLoading(true);
     setErrors({});
     try {
-      await login(email.trim(), password);
-      navigate("/", { replace: true });
-    } catch (err) {
-      setErrors({
-        form: err instanceof Error ? err.message : "Invalid email or password",
+      const response = await api.post("/login", null, {
+        headers: {
+          emailId: email.trim(),
+          password,
+        },
       });
+
+      console.log("Login API response:", response.data);
+
+      localStorage.setItem("emailId", email.trim());
+      localStorage.setItem("password", password);
+      localStorage.setItem("user", JSON.stringify(response.data));
+
+      navigate("/", { replace: true });
+    } catch (error) {
+      console.error("Login failed:", error);
+      setErrors({ form: "Invalid credentials" });
+      alert("Invalid credentials");
     } finally {
       setLoading(false);
     }
@@ -53,7 +66,7 @@ const Login = () => {
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+      <form onSubmit={handleLogin} className="space-y-4" noValidate>
         <AuthInput
           label="Email"
           type="email"
