@@ -26,18 +26,20 @@ const Login = () => {
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Login clicked");
     if (!validate()) return;
     setLoading(true);
     setErrors({});
     try {
       const user = await loginUser(email.trim(), password);
-      console.log("Login API response:", user);
+      console.log("LOGIN RESPONSE:", user);
       navigate("/", { replace: true });
     } catch (error) {
       console.error("Login failed:", error);
-      setErrors({ form: "Invalid credentials" });
-      alert("Invalid credentials");
+      setErrors({
+        form: error instanceof Error && error.message.includes("401")
+          ? "Invalid credentials"
+          : "Login failed. Check credentials.",
+      });
     } finally {
       setLoading(false);
     }
