@@ -32,7 +32,7 @@ const Account = () => {
       onClick: () => setTheme(isDark ? "light" : "dark") 
     },
     { label: "Contact Us", icon: Phone, onClick: () => {} },
-    { label: "Logout", icon: LogOut, onClick: () => {} },
+    { label: "Logout", icon: LogOut, onClick: () => { import("@/services/authService").then(m => m.logout()); } },
   ];
 
   return (

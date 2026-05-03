@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getOrders } from "@/services/orderService";
+import { getProductImage, FALLBACK_IMAGE } from "@/utils/imageHelper";
 
 export function mapOrder(apiOrder: any) {
   return {
@@ -17,16 +18,23 @@ export function mapOrder(apiOrder: any) {
       state: apiOrder.address?.state || "",
       pincode: apiOrder.address?.zipCode || apiOrder.address?.pincode || "",
     },
-    items: (apiOrder.orderItems || apiOrder.items || []).map((i: any) => ({
-      product: {
-        id: i.subProduct?.id?.toString() || i.subProduct?.subProductId?.toString() || "",
-        name: i.subProduct?.productName || "Product",
-        price: i.sellingPricePerUnit || 0,
-        offerPrice: i.sellingPricePerUnit || 0,
-        image: i.subProduct?.productImageList?.[0]?.id ? `http://localhost:8080/ecommerce/productimage?productImageId=${i.subProduct?.productImageList[0].id}` : "https://images.unsplash.com/photo-1594007654729-407eedc4be65?w=200&h=200&fit=crop&auto=format&q=80",
-      },
-      qty: i.quantity || 1,
-    })),
+    items: (apiOrder.orderItems || apiOrder.items || []).map((i: any) => {
+      const imageId =
+        i.subProduct?.productImageList?.[0]?.id ||
+        i.subProduct?.productImageList?.[0]?.productImageId ||
+        i.subProduct?.productImageId ||
+        null;
+      return {
+        product: {
+          id: i.subProduct?.id?.toString() || i.subProduct?.subProductId?.toString() || "",
+          name: i.subProduct?.productName || i.subProduct?.name || "Product",
+          price: i.sellingPricePerUnit || 0,
+          offerPrice: i.sellingPricePerUnit || 0,
+          image: imageId ? getProductImage(imageId) : FALLBACK_IMAGE,
+        },
+        qty: i.quantity || 1,
+      };
+    }),
   };
 }
 
@@ -39,7 +47,7 @@ export const useOrders = () => {
       setLoading(false);
       return;
     }
-    
+
     getOrders()
       .then((res) => {
         const arr = Array.isArray(res) ? res : res?.data || [];

@@ -5,6 +5,7 @@ import SectionGrid from "@/components/SectionGrid/SectionGrid";
 import { useCategories } from "@/hooks/useCategories";
 import { useSubCategories } from "@/hooks/useSubCategories";
 import { brands } from "@/data/brands";
+import { getProductImage } from "@/utils/imageHelper";
 
 import banner1 from "@/assets/banner1.webp";
 import banner2 from "@/assets/banner2.webp";
@@ -22,7 +23,7 @@ const CategorySection = ({ category, idx }: { category: any, idx: number }) => {
         items={subcategories.map((sub: any) => ({
           id: sub.subCategoryId?.toString(),
           name: sub.subCategoryName,
-          image: sub.productImageId ? `http://localhost:8080/ecommerce/productimage?productImageId=${sub.productImageId}` : "https://images.unsplash.com/photo-1594007654729-407eedc4be65?w=200&h=200&fit=crop&auto=format&q=80",
+          image: getProductImage(sub.productImageId),
           link: `/category/${category.primaryCategoryId}/${sub.subCategoryId}`,
         }))}
       />

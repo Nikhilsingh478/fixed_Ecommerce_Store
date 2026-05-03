@@ -7,33 +7,34 @@ import ProductCard from "@/components/ProductCard/ProductCard";
 import FilterDrawer from "@/components/FilterDrawer/FilterDrawer";
 import SortDrawer from "@/components/SortDrawer/SortDrawer";
 import { useProducts } from "@/hooks/useProducts";
+import { useSearch } from "@/hooks/useSearch";
 
 const ProductListing = () => {
   const { category, subcategory } = useParams();
   const navigate = useNavigate();
-  const { products, loading } = useProducts(subcategory as string);
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get("q") || "";
+
+  const { products, loading: productsLoading } = useProducts(subcategory || "");
+  const { results: searchResults, loading: searchLoading } = useSearch(query);
+
+  const loading = query ? searchLoading : productsLoading;
+  const rawProducts = query ? searchResults : products;
+
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [sortValue, setSortValue] = useState("popular");
   const [filters, setFilters] = useState<Record<string, string[]>>({});
-  const [searchParams] = useSearchParams();
-  const query = searchParams.get("q");
 
   const filtered = useMemo(() => {
-    let list = products;
-    if (query) {
-      const q = query.toLowerCase();
-      list = list.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        p.brand.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        p.subcategory.toLowerCase().includes(q)
-      );
-    } else if (subcategory) {
-      list = list.filter((p) => p.subcategory === subcategory);
-    } else if (category) {
+    let list = rawProducts;
+
+    if (!query && subcategory) {
+      list = list.filter((p) => !p.subcategory || p.subcategory === subcategory);
+    } else if (!query && category) {
       list = list.filter((p) => p.category === category || p.brand.toLowerCase() === category);
     }
+
     if (filters.Category?.length) list = list.filter((p) => filters.Category.includes(p.category));
     if (filters.Brand?.length)    list = list.filter((p) => filters.Brand.includes(p.brand));
     if (filters.Discount?.length) {
@@ -49,6 +50,7 @@ const ProductListing = () => {
         return false;
       }));
     }
+
     switch (sortValue) {
       case "price-low":     list = [...list].sort((a, b) => a.offerPrice - b.offerPrice); break;
       case "price-high":    list = [...list].sort((a, b) => b.offerPrice - a.offerPrice); break;
@@ -56,7 +58,7 @@ const ProductListing = () => {
       case "discount-high": list = [...list].sort((a, b) => b.discount - a.discount); break;
     }
     return list;
-  }, [category, subcategory, sortValue, filters, query]);
+  }, [rawProducts, category, subcategory, sortValue, filters, query]);
 
   const rawTitle = query ? `"${query}"` : (subcategory || category || "All Products");
   const title = typeof rawTitle === "string" ? rawTitle.replace(/-/g, " ") : rawTitle;
@@ -75,7 +77,7 @@ const ProductListing = () => {
     </div>
   );
 
-  if (!loading && !products.length) return <EmptyState />;
+  if (!loading && !rawProducts.length) return <EmptyState />;
 
   return (
     <div className="flex min-h-screen flex-col bg-background pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
@@ -118,25 +120,36 @@ const ProductListing = () => {
           </div>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 px-4 md:px-0">
-          {filtered.map((p, i) => (
-            <div
-              key={p.id}
-              className="animate-fade-up"
-              style={{ animationDelay: `${Math.min(i * 40, 400)}ms` }}
-            >
-              <ProductCard product={p} />
-            </div>
-          ))}
-        </div>
+        {/* Loading skeleton */}
+        {loading && (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 px-4 md:px-0">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="rounded-2xl bg-card border border-border animate-pulse aspect-[3/4]" />
+            ))}
+          </div>
+        )}
 
-        {filtered.length === 0 && (
+        {/* Grid */}
+        {!loading && (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 px-4 md:px-0">
+            {filtered.map((p, i) => (
+              <div
+                key={p.id}
+                className="animate-fade-up"
+                style={{ animationDelay: `${Math.min(i * 40, 400)}ms` }}
+              >
+                <ProductCard product={p} />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!loading && filtered.length === 0 && rawProducts.length > 0 && (
           <div className="py-32 flex flex-col items-center justify-center text-center animate-fade-in">
             <div className="h-16 w-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-4">
               <SlidersHorizontal className="h-5 w-5 text-muted-foreground" strokeWidth={1.7} />
             </div>
-            <h3 className="text-base font-semibold text-foreground">No products found</h3>
+            <h3 className="text-base font-semibold text-foreground">No products match filters</h3>
             <p className="text-sm text-muted-foreground mt-1 max-w-[200px]">Try adjusting your filters</p>
           </div>
         )}

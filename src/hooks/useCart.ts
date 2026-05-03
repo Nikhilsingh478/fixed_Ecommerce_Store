@@ -1,20 +1,22 @@
 import { useState, useEffect } from "react";
 import { getCart, addToCart as apiAddToCart, removeFromCart as apiRemoveFromCart } from "@/services/cartService";
-
-export const getImage = (id: string | number | undefined) => {
-  if (!id) return "https://images.unsplash.com/photo-1594007654729-407eedc4be65?w=200&h=200&fit=crop&auto=format&q=80";
-  return `http://localhost:8080/ecommerce/productimage?productImageId=${id}`;
-};
+import { getProductImage, FALLBACK_IMAGE } from "@/utils/imageHelper";
 
 export function mapCartItem(item: any) {
+  const imageId =
+    item.subProduct?.productImageList?.[0]?.id ||
+    item.subProduct?.productImageList?.[0]?.productImageId ||
+    item.subProduct?.productImageId ||
+    null;
+
   return {
     product: {
       id: item.subProduct?.id?.toString() || item.subProduct?.subProductId?.toString() || "",
-      name: item.subProduct?.productName || "Product",
-      price: item.sellingPricePerUnit || 0,
-      offerPrice: item.sellingPricePerUnit || 0,
-      mrp: item.sellingPricePerUnit || 0,
-      image: getImage(item.subProduct?.productImageList?.[0]?.id),
+      name: item.subProduct?.productName || item.subProduct?.name || "Product",
+      price: item.sellingPricePerUnit || item.subProduct?.sellingPrice || 0,
+      offerPrice: item.sellingPricePerUnit || item.subProduct?.sellingPrice || 0,
+      mrp: item.subProduct?.mrp || item.sellingPricePerUnit || 0,
+      image: imageId ? getProductImage(imageId) : FALLBACK_IMAGE,
     },
     qty: item.quantity || 1,
     cartId: item.cart?.id || item.cart?.cartId || "",
