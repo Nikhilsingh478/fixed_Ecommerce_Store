@@ -74,6 +74,15 @@ Service worker (Workbox) is enabled in both dev and production with:
 - Shows unique products from all past orders
 - "Add to Cart" per item with live cart state display
 
+## Backend API Configuration
+
+This app connects to a custom backend API. Set the `VITE_API_URL` environment variable (or secret) to point to your backend:
+
+- Default fallback: `http://localhost:8080/ecommerce`
+- Example: `VITE_API_URL=https://your-api.example.com/ecommerce`
+
+Auth uses email/password sent as request headers (via Axios interceptor in `src/services/apiClient.ts`). Credentials are stored in `localStorage` after login.
+
 ## Deployment
 
 Configured as a static site deployment:

@@ -1,0 +1,168 @@
+You are an expert senior frontend engineer specializing in React (Vite + TypeScript) and backend integration.
+
+Your task is to FIX and COMPLETE a broken e-commerce store frontend so that it works seamlessly with an existing Spring Boot backend.
+
+IMPORTANT CONTEXT:
+
+The backend:
+
+* Uses header-based authentication (emailId, password on EVERY request)
+* Does NOT use JWT
+* Uses nested structure:
+  primaryCategory → subCategory → product → subProduct
+* Uses subProduct as the actual purchasable entity
+* Requires headers like:
+  emailId, password, subCategoryId, pageNumber, cartId, addressId
+* Serves images via:
+  /productimage?productImageId=ID
+
+The frontend:
+
+* Built using React + TypeScript + Vite
+* Uses:
+
+  * services/ (API layer)
+  * hooks/ (data mapping + caching)
+  * components/ (UI)
+* Already has partial structure but integration is broken
+
+YOUR GOAL:
+Make the frontend FULLY WORKING without modifying backend architecture.
+
+---
+
+# 🔧 TASK BREAKDOWN (FOLLOW STRICTLY IN ORDER)
+
+---
+
+## 1. FIX AUTHENTICATION FLOW
+
+Problem:
+Frontend sends login data in body, backend expects headers.
+
+Fix:
+
+* Modify login API call:
+  POST /ecommerce/login
+  Headers:
+  emailId
+  password
+
+* After login:
+
+  * Store emailId in localStorage
+  * Store password in localStorage
+  * Store user object
+
+* Implement:
+
+  * Redirect to /login on 403
+  * Global auth guard
+
+Output:
+
+* Fixed login function
+* Example login component integration
+
+---
+
+## 2. FIX API CLIENT (CORE SYSTEM)
+
+File: src/services/apiClient.ts
+
+Requirements:
+
+* Use axios instance
+
+* Automatically attach headers to EVERY request:
+  emailId (from localStorage)
+  password (from localStorage)
+  Content-Type: application/json
+
+* Add response interceptor:
+  IF 403:
+
+  * clear localStorage
+  * redirect to /login
+
+* Ensure clean modular reusable structure
+
+Output:
+
+* Full apiClient.ts code
+
+---
+
+## 3. FIX PRODUCT DATA PIPELINE (CRITICAL)
+
+Backend flow:
+GET /primarycategory
+→ GET /subcategory (via primaryCategoryId)
+→ GET /product (via subCategoryId)
+
+Issues:
+
+* Data is nested and inconsistent
+* UI expects flat structure
+
+Fix:
+
+* Create a mapping layer inside hooks/useProducts.ts
+
+Mapping rules:
+
+* id → subProductId
+* name → productName
+* price → sellingPrice
+* mrp → mrp (if exists)
+* image → first element of productImageList
+
+Output format:
+{
+id,
+name,
+price,
+mrp,
+image,
+brand,
+category,
+subcategory
+}
+
+Also:
+
+* Cache products in memory
+* Avoid duplicate fetch calls
+
+---
+
+## 4. FIX IMAGE HANDLING
+
+Create helper function:
+
+getImage(productImageId)
+
+Returns:
+http://localhost:8080/ecommerce/productimage?productImageId=ID
+
+Add:
+
+* fallback image if missing
+* safe null checks
+
+---
+
+## 5. FIX CART SYSTEM
+
+Backend requires:
+POST /addtocart
+Body:
+{
+subProduct: { id },
+quantity
+}
+
+Fix:
+
+* Ensure product.id = subProductId
+* Implement:
