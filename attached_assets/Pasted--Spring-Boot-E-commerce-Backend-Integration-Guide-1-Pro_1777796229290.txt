@@ -1,0 +1,495 @@
+# 🛒 Spring Boot E-commerce Backend Integration Guide
+
+---
+
+# 1. 🧠 Project Overview
+
+## Tech Stack
+- Spring Boot 2.7.5
+- Java 11
+- Spring Web (REST APIs)
+- Spring Data JPA / Hibernate
+- Spring Validation
+- MySQL (Primary DB - ORIGINAL SYSTEM)
+- Embedded Tomcat
+
+---
+
+## Architecture
+
+```
+Controller → Service → DAO → Entity
+```
+
+- Controllers handle HTTP requests
+- Services contain business logic
+- DAO layer uses EntityManager (not pure repository pattern)
+- Entities map to database tables
+
+---
+
+## High-Level Data Flow
+
+```
+Frontend → Request (Headers)
+→ Controller (auth check)
+→ Service
+→ DAO
+→ Database
+→ Response (Entity/Model)
+```
+
+---
+
+# 2. ⚙️ Server Configuration
+
+## Base URL
+
+```
+http://localhost:8080/ecommerce
+```
+
+---
+
+## Key Config File
+
+```
+src/main/resources/application.properties
+```
+
+---
+
+## Important Settings
+
+```properties
+server.port=8080
+
+spring.datasource.url=jdbc:mysql://localhost:3306/ecommerce
+spring.datasource.username=YOUR_USERNAME
+spring.datasource.password=YOUR_PASSWORD
+
+spring.jpa.hibernate.ddl-auto=update
+```
+
+---
+
+# 3. 🔐 Authentication System (CRITICAL)
+
+⚠️ This backend does NOT use JWT.
+
+---
+
+## Login Endpoint
+
+```
+POST /ecommerce/login
+```
+
+---
+
+## Required Headers
+
+```
+emailId: user@example.com
+password: userpassword
+```
+
+---
+
+## Response
+
+### ✅ Success (200)
+
+```json
+{
+  "id": 1,
+  "fullName": "Test User",
+  "emailId": "user@example.com",
+  "userRole": {
+    "id": 2,
+    "userRoleName": "customer"
+  },
+  "password": ""
+}
+```
+
+---
+
+### ❌ Failure (403)
+
+- Invalid credentials
+- Missing headers
+
+---
+
+## ⚠️ Important Rules
+
+- Every API call requires:
+  ```
+  emailId
+  password
+  ```
+- No session / token system
+- Fully header-based auth
+
+---
+
+# 4. 🔌 API Endpoints
+
+---
+
+## 🟢 AUTH
+
+### Login
+
+```
+POST /ecommerce/login
+```
+
+---
+
+## 🟡 CATEGORY FLOW
+
+### Get Primary Categories
+
+```
+GET /ecommerce/primarycategory
+Headers:
+  emailId
+  password
+```
+
+---
+
+### Get Subcategories
+
+```
+GET /ecommerce/subcategory
+Headers:
+  emailId
+  password
+  primaryCategoryId
+```
+
+---
+
+## 🔵 PRODUCT FLOW
+
+### Get Products
+
+```
+GET /ecommerce/product
+Headers:
+  emailId
+  password
+  subCategoryId
+```
+
+---
+
+### Get All Products
+
+```
+GET /ecommerce/allproduct
+Headers:
+  emailId
+  password
+```
+
+---
+
+## 🟠 CART
+
+### Add to Cart
+
+```
+POST /ecommerce/addtocart
+Headers:
+  emailId
+  password
+
+Body:
+{
+  "subProductId": 10,
+  "quantity": 1
+}
+```
+
+---
+
+### View Cart
+
+```
+GET /ecommerce/viewcart
+Headers:
+  emailId
+  password
+```
+
+---
+
+## 🔴 ORDERS
+
+### Place Order
+
+```
+POST /ecommerce/order
+Headers:
+  emailId
+  password
+  cartId
+  addressId
+```
+
+---
+
+### View Orders
+
+```
+GET /ecommerce/order
+Headers:
+  emailId
+  password
+```
+
+---
+
+# 5. 🧱 Data Model
+
+---
+
+## PrimaryCategory
+
+- id
+- primaryCategoryName
+
+---
+
+## SubCategory
+
+- id
+- subCategoryName
+- primaryCategory
+
+---
+
+## Product
+
+- id
+- productName
+- subCategory
+- brand
+- productImageList
+
+---
+
+## 🔥 SubProduct (MOST IMPORTANT)
+
+This is the REAL product.
+
+- id ✅ (used in frontend)
+- sellingPrice
+- mrp
+- discountPercent
+- product
+
+---
+
+## Cart
+
+- id
+- applicationUser
+
+---
+
+## Order
+
+- id
+- cart
+- address
+
+---
+
+# 6. 🔁 Request Patterns (IMPORTANT)
+
+---
+
+## Headers Used For Everything
+
+```
+emailId
+password
+primaryCategoryId
+subCategoryId
+subProductId
+cartId
+addressId
+```
+
+---
+
+## ❗ Non-Standard Design
+
+- No query params
+- No RESTful URLs
+- Everything passed via headers
+
+---
+
+## 🔄 API Flow (MANDATORY ORDER)
+
+```
+1. Login
+2. Get Primary Categories
+3. Get Subcategories
+4. Get Products
+5. Use subProductId for cart
+```
+
+---
+
+# 7. 🖼️ Image Handling
+
+---
+
+## Fetch Image
+
+```
+GET /ecommerce/productimage?productImageId=ID
+```
+
+---
+
+## Frontend Usage
+
+```js
+const imageUrl = `${BASE_URL}/productimage?productImageId=${id}`;
+```
+
+---
+
+# 8. ⚠️ Error Handling
+
+---
+
+## Status Codes
+
+| Code | Meaning             |
+|------|---------------------|
+| 200  | Success             |
+| 403  | Auth failure        |
+| 404  | Not found           |
+| 409  | Conflict/Duplicate  |
+
+---
+
+## Common Failures
+
+- Missing headers
+- Wrong credentials
+- Missing ID headers
+
+---
+
+# 9. 🧩 Frontend Integration Guide
+
+---
+
+## Required Headers (ALWAYS)
+
+```js
+{
+  emailId,
+  password
+}
+```
+
+---
+
+## Frontend Flow
+
+```
+Login
+↓
+Fetch primary categories
+↓
+Fetch subcategories
+↓
+Fetch products
+↓
+Map subProduct → UI
+↓
+Add to cart using subProductId
+```
+
+---
+
+## ⚠️ Important Mapping
+
+| Backend    | Frontend      |
+|------------|---------------|
+| Product    | Display group |
+| SubProduct | Actual item   |
+
+---
+
+# 10. 🚨 Known Issues
+
+- Header-based auth (not secure)
+- No JWT
+- Nested API calls (slow)
+- Non-standard REST design
+- Hard dependency on headers
+
+---
+
+# 11. 🧪 Debugging Guide
+
+---
+
+## Test Backend
+
+```
+http://localhost:8080/
+```
+
+---
+
+## Test API
+
+```
+http://localhost:8080/ecommerce/primarycategory
+```
+
+---
+
+## Debug Checklist
+
+- Is backend running?
+- Are headers present?
+- Is user valid?
+- Is correct ID passed?
+
+---
+
+# 🎯 Final Summary
+
+## Backend Rules
+
+- Always send headers
+- Follow API order strictly
+- Use subProductId for actions
+- Do NOT assume REST standards
+
+---
+
+## If Something Breaks
+
+👉 90% chance it's one of:
+- Missing headers
+- Wrong ID
+- Wrong API order
+
+---
+
+# 🚀 END OF DOCUMENT

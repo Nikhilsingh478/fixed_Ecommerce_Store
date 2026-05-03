@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { getCart, addToCart as apiAddToCart, removeFromCart as apiRemoveFromCart } from "@/services/cartService";
-import { getProductImage } from "@/utils/imageHelper";
 
 export function mapCartItem(item: any) {
   const imageId =
@@ -16,7 +15,7 @@ export function mapCartItem(item: any) {
       price: item.sellingPricePerUnit || item.subProduct?.sellingPrice || 0,
       offerPrice: item.sellingPricePerUnit || item.subProduct?.sellingPrice || 0,
       mrp: item.subProduct?.mrp || item.sellingPricePerUnit || 0,
-      image: getProductImage(imageId),
+      image: imageId ? `/ecommerce/productimage?productImageId=${imageId}` : "",
     },
     qty: item.quantity || 1,
     cartId: item.cart?.id || item.cart?.cartId || "",

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import api from "@/services/apiClient";
-import { getProductImage } from "@/utils/imageHelper";
 
 export interface Product {
   id: string;
@@ -26,7 +25,7 @@ export const mapProduct = (item: any, subCategoryId?: string | number, primaryCa
     mrp: Number(subProduct.mrp || subProduct.maximumRetailPrice || subProduct.sellingPrice || subProduct.price || 0),
     offerPrice: Number(subProduct.sellingPrice || subProduct.price || 0),
     discount: Number(subProduct.discountPercent || 0),
-    image: getProductImage(imageId),
+    image: imageId ? `/ecommerce/productimage?productImageId=${imageId}` : "",
     brand: item.brand?.brandName || item.brandName || "",
     category: primaryCategoryId?.toString() || "",
     subcategory: subCategoryId?.toString() || "",
@@ -45,12 +44,8 @@ export const useProducts = (primaryCategoryId?: number | string, subCategoryId?:
       setLoading(true);
       setError(null);
       try {
-        const categoriesRes = await api.get("/primarycategory", {
-          headers: { pageNumber: "1" },
-        });
-
+        const categoriesRes = await api.get("/primarycategory", { headers: { pageNumber: "1" } });
         const categories = Array.isArray(categoriesRes.data) ? categoriesRes.data : categoriesRes.data?.data || [];
-        console.log("Categories:", categories);
 
         const categoryIds = primaryCategoryId
           ? [primaryCategoryId.toString()]
@@ -59,10 +54,7 @@ export const useProducts = (primaryCategoryId?: number | string, subCategoryId?:
         const allSubCategories = await Promise.all(
           categoryIds.map(async (catId) => {
             const subRes = await api.get("/subcategory", {
-              headers: {
-                primaryCategoryId: catId,
-                pageNumber: "1",
-              },
+              headers: { primaryCategoryId: catId, pageNumber: "1" },
             });
             return Array.isArray(subRes.data) ? subRes.data : subRes.data?.data || [];
           }),
@@ -76,10 +68,7 @@ export const useProducts = (primaryCategoryId?: number | string, subCategoryId?:
         const productGroups = await Promise.all(
           filteredSubCategories.map(async (sub: any) => {
             const productRes = await api.get("/product", {
-              headers: {
-                subCategoryId: sub.subCategoryId?.toString(),
-                pageNumber: "1",
-              },
+              headers: { subCategoryId: sub.subCategoryId?.toString(), pageNumber: "1" },
             });
             return {
               subCategoryId: sub.subCategoryId,
@@ -94,7 +83,6 @@ export const useProducts = (primaryCategoryId?: number | string, subCategoryId?:
         );
 
         if (active) {
-          console.log("Products:", mapped);
           setProducts(mapped);
         }
       } catch (err) {

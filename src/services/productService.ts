@@ -18,10 +18,7 @@ export const getAllProducts = async (pageNumber = 0) => {
   return res.data;
 };
 
-export const getProductsBySubCategory = async (
-  subCategoryId: string | number,
-  pageNumber = 0,
-) => {
+export const getProductsBySubCategory = async (subCategoryId: string | number, pageNumber = 0) => {
   checkAuth();
   const res = await apiClient.get(API_ENDPOINTS.product, {
     headers: {

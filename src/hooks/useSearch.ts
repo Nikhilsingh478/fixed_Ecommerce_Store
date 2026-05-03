@@ -21,9 +21,7 @@ export const useSearch = (keyword: string) => {
         },
       })
       .then((res) => {
-        const raw = Array.isArray(res.data)
-          ? res.data
-          : res.data?.products || res.data?.data || [];
+        const raw = Array.isArray(res.data) ? res.data : res.data?.products || res.data?.data || [];
         setResults(raw.map((item: any) => mapProduct(item)));
       })
       .catch(console.error)

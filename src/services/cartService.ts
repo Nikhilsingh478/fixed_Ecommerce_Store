@@ -19,7 +19,7 @@ export const getCart = async () => {
 export const addToCart = async (subProductId: string | number, quantity = 1) => {
   checkAuth();
   const res = await apiClient.post(API_ENDPOINTS.addToCart, {
-    subProduct: { id: subProductId },
+    subProductId: Number(subProductId),
     quantity,
   });
   return res.data;
