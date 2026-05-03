@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "@/services/apiClient";
-import { getProductImage, FALLBACK_IMAGE } from "@/utils/imageHelper";
+import { getProductImage } from "@/utils/imageHelper";
 
 export interface Product {
   id: string;
@@ -15,68 +15,100 @@ export interface Product {
   subcategory: string;
 }
 
-export const mapProduct = (
-  item: any,
-  subCategoryId?: string | number,
-  primaryCategoryId?: string | number
-): Product => {
-  const imageId =
-    item.productImageList?.[0]?.id ||
-    item.productImageList?.[0]?.productImageId ||
-    item.productImageId ||
-    null;
+const mapProduct = (item: any, subCategoryId?: string | number, primaryCategoryId?: string | number): Product => {
+  const subProduct = item.subProduct ?? item;
+  const imageId = item.productImageList?.[0]?.id ?? item.productImageList?.[0]?.productImageId ?? item.productImageId ?? null;
 
   return {
-    id: item.subProduct?.id?.toString() || item.subProduct?.subProductId?.toString() || item.id?.toString() || "",
-    name: item.productName || item.name || "Product",
-    price: item.subProduct?.sellingPrice || 0,
-    mrp: item.subProduct?.mrp || item.subProduct?.sellingPrice || 0,
-    offerPrice: item.subProduct?.sellingPrice || 0,
-    discount: item.subProduct?.discountPercent || 0,
-    image: imageId ? getProductImage(imageId) : FALLBACK_IMAGE,
+    id: subProduct.subProductId?.toString() || subProduct.id?.toString() || item.subProductId?.toString() || item.id?.toString() || "",
+    name: item.productName || subProduct.productName || item.name || subProduct.name || "",
+    price: Number(subProduct.sellingPrice || subProduct.price || 0),
+    mrp: Number(subProduct.mrp || subProduct.maximumRetailPrice || subProduct.sellingPrice || subProduct.price || 0),
+    offerPrice: Number(subProduct.sellingPrice || subProduct.price || 0),
+    discount: Number(subProduct.discountPercent || 0),
+    image: getProductImage(imageId),
     brand: item.brand?.brandName || item.brandName || "",
     category: primaryCategoryId?.toString() || "",
     subcategory: subCategoryId?.toString() || "",
   };
 };
 
-const productCache = new Map<string, Product[]>();
-
-export const useProducts = (subCategoryId: number | string, primaryCategoryId?: number | string) => {
-  const [data, setData] = useState<Product[]>(() => {
-    const key = subCategoryId?.toString();
-    return key ? (productCache.get(key) || []) : [];
-  });
+export const useProducts = (primaryCategoryId?: number | string, subCategoryId?: number | string) => {
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!subCategoryId) return;
-    const key = subCategoryId.toString();
+    let active = true;
 
-    if (productCache.has(key)) {
-      setData(productCache.get(key)!);
-      return;
-    }
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const categoriesRes = await api.get("/primarycategory", {
+          headers: { pageNumber: "1" },
+        });
 
-    setLoading(true);
-    api
-      .get("/product", {
-        headers: {
-          subCategoryId: key,
-          pageNumber: "1",
-        },
-      })
-      .then((res) => {
-        const raw = Array.isArray(res.data)
-          ? res.data
-          : res.data?.products || res.data?.data || [];
-        const mapped = raw.map((item: any) => mapProduct(item, subCategoryId, primaryCategoryId));
-        productCache.set(key, mapped);
-        setData(mapped);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [subCategoryId, primaryCategoryId]);
+        const categories = Array.isArray(categoriesRes.data) ? categoriesRes.data : categoriesRes.data?.data || [];
+        console.log("Categories:", categories);
 
-  return { products: data, loading };
+        const categoryIds = primaryCategoryId
+          ? [primaryCategoryId.toString()]
+          : categories.map((category: any) => category.primaryCategoryId?.toString()).filter(Boolean);
+
+        const allSubCategories = await Promise.all(
+          categoryIds.map(async (catId) => {
+            const subRes = await api.get("/subcategory", {
+              headers: {
+                primaryCategoryId: catId,
+                pageNumber: "1",
+              },
+            });
+            return Array.isArray(subRes.data) ? subRes.data : subRes.data?.data || [];
+          }),
+        );
+
+        const subCategories = allSubCategories.flat();
+        const filteredSubCategories = subCategoryId
+          ? subCategories.filter((sub: any) => sub.subCategoryId?.toString() === subCategoryId.toString())
+          : subCategories;
+
+        const productGroups = await Promise.all(
+          filteredSubCategories.map(async (sub: any) => {
+            const productRes = await api.get("/product", {
+              headers: {
+                subCategoryId: sub.subCategoryId?.toString(),
+                pageNumber: "1",
+              },
+            });
+            return {
+              subCategoryId: sub.subCategoryId,
+              primaryCategoryId: sub.primaryCategoryId,
+              products: Array.isArray(productRes.data) ? productRes.data : productRes.data?.data || [],
+            };
+          }),
+        );
+
+        const mapped = productGroups.flatMap((group) =>
+          group.products.map((item: any) => mapProduct(item, group.subCategoryId, group.primaryCategoryId)),
+        );
+
+        if (active) {
+          console.log("Products:", mapped);
+          setProducts(mapped);
+        }
+      } catch (error) {
+        console.error("Failed to load products:", error);
+        if (active) setProducts([]);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    fetchProducts();
+
+    return () => {
+      active = false;
+    };
+  }, [primaryCategoryId, subCategoryId]);
+
+  return { products, loading };
 };

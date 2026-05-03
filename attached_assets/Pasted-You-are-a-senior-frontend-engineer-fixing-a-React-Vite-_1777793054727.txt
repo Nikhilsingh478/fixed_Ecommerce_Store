@@ -1,0 +1,207 @@
+You are a senior frontend engineer fixing a React (Vite + TypeScript) e-commerce store.
+
+The backend is a Spring Boot API using MySQL and has the following STRICT behavior:
+
+---
+
+# ⚠️ BACKEND CONTRACT (DO NOT VIOLATE)
+
+* Base URL: http://localhost:8080/ecommerce
+
+* Authentication:
+
+  * EVERY request requires headers:
+    emailId
+    password
+  * No JWT, no cookies
+
+* Login:
+  POST /login
+  Headers:
+  emailId
+  password
+
+* Data flow:
+  primaryCategory → subCategory → product → subProduct
+
+* IMPORTANT:
+  subProductId is the REAL product ID for cart actions
+
+---
+
+# 🚨 CURRENT PROBLEMS
+
+1. Login button does NOT trigger API request
+2. No /login request visible in Network tab
+3. Products are NOT loading (/subcategory and /product not called)
+4. UI is partially broken after removing dummy data
+
+---
+
+# 🎯 GOAL
+
+Make the frontend FULLY functional with real backend integration.
+
+---
+
+# 🔧 TASKS (STRICT ORDER)
+
+---
+
+## 1. FIX LOGIN FUNCTION (CRITICAL)
+
+File: Login.tsx
+
+Ensure:
+
+* Form has:
+
+  <form onSubmit={handleLogin}>
+
+* Button: <button type="submit">
+
+* Implement handleLogin:
+
+const handleLogin = async (e) => {
+e.preventDefault();
+console.log("LOGIN CLICKED");
+
+try {
+const response = await api.post("/login", null, {
+headers: {
+emailId: email,
+password: password,
+},
+});
+
+```
+console.log("Login API response:", response.data);
+
+localStorage.setItem("emailId", email);
+localStorage.setItem("password", password);
+
+window.location.href = "/";
+```
+
+} catch (error) {
+console.error("Login failed:", error);
+alert("Invalid credentials");
+}
+};
+
+---
+
+## 2. ENSURE API CLIENT IS USED
+
+All API calls must use apiClient (axios instance).
+
+Ensure headers are attached globally:
+
+* emailId
+* password
+
+---
+
+## 3. FIX PRODUCT FETCH PIPELINE
+
+File: useProducts.ts
+
+Implement FULL chain:
+
+1. GET /primarycategory
+
+2. For each category:
+   GET /subcategory
+   Headers:
+   primaryCategoryId
+
+3. For each subcategory:
+   GET /product
+   Headers:
+   subCategoryId
+
+4. Combine results into one flat product array
+
+---
+
+## 4. MAP BACKEND DATA
+
+Transform into UI format:
+
+{
+id: subProductId,
+name: productName,
+price: sellingPrice,
+image: productImageList?.[0]?.id
+}
+
+---
+
+## 5. FIX IMAGE URL
+
+Use:
+
+`${BASE_URL}/productimage?productImageId=${id}`
+
+---
+
+## 6. REMOVE ALL FALLBACK LOGIC
+
+NO:
+
+* dummyData
+* mockData
+* fallback arrays
+
+If API fails → show empty UI
+
+---
+
+## 7. VERIFY NETWORK CALLS
+
+After login:
+
+Network tab MUST show:
+
+POST /login
+GET /primarycategory
+GET /subcategory
+GET /product
+
+---
+
+## 8. DEBUG LOGGING
+
+Add logs:
+
+console.log("Categories:", categories);
+console.log("Products:", products);
+
+---
+
+# 🚫 STRICT RULES
+
+DO NOT:
+
+* Use localStorage-only login
+* Add fake data
+* Skip API calls
+* Assume data exists
+
+---
+
+# 🎯 FINAL RESULT
+
+1. Login triggers backend request
+2. Wrong credentials → fail
+3. Correct credentials → login
+4. Products load dynamically
+5. UI shows ONLY backend data
+
+---
+
+Output:
+
+* Fixed Login.tsx
+* Fixed useProducts.ts
+* Any modified files

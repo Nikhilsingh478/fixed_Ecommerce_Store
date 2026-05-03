@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getOrders } from "@/services/orderService";
-import { getProductImage, FALLBACK_IMAGE } from "@/utils/imageHelper";
+import { getProductImage } from "@/utils/imageHelper";
 
 export function mapOrder(apiOrder: any) {
   return {
@@ -30,7 +30,7 @@ export function mapOrder(apiOrder: any) {
           name: i.subProduct?.productName || i.subProduct?.name || "Product",
           price: i.sellingPricePerUnit || 0,
           offerPrice: i.sellingPricePerUnit || 0,
-          image: imageId ? getProductImage(imageId) : FALLBACK_IMAGE,
+          image: getProductImage(imageId),
         },
         qty: i.quantity || 1,
       };

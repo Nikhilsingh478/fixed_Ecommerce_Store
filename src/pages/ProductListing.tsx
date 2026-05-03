@@ -15,7 +15,7 @@ const ProductListing = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
 
-  const { products, loading: productsLoading } = useProducts(subcategory || "");
+  const { products, loading: productsLoading } = useProducts(category, subcategory);
   const { results: searchResults, loading: searchLoading } = useSearch(query);
 
   const loading = query ? searchLoading : productsLoading;
@@ -31,12 +31,6 @@ const ProductListing = () => {
   const filtered = useMemo(() => {
     let list = rawProducts;
 
-    if (!query && subcategory) {
-      list = list.filter((p) => !p.subcategory || p.subcategory === subcategory);
-    } else if (!query && category) {
-      list = list.filter((p) => p.category === category || p.brand.toLowerCase() === category);
-    }
-
     if (filters.Category?.length) list = list.filter((p) => filters.Category.includes(p.category));
     if (filters.Brand?.length) list = list.filter((p) => filters.Brand.includes(p.brand));
     if (filters.Discount?.length) {
@@ -46,8 +40,8 @@ const ProductListing = () => {
     if (filters.Price?.length) {
       list = list.filter((p) => filters.Price.some((b) => {
         if (b === "Under ₹100") return p.offerPrice < 100;
-        if (b === "₹100 - ₹300") return p.offerPrice >= 100 && p.offerPrice <= 300;
-        if (b === "₹300 - ₹500") return p.offerPrice > 300 && p.offerPrice <= 500;
+        if (b === "₹100 – ₹300") return p.offerPrice >= 100 && p.offerPrice <= 300;
+        if (b === "₹300 – ₹500") return p.offerPrice > 300 && p.offerPrice <= 500;
         if (b === "Above ₹500") return p.offerPrice > 500;
         return false;
       }));
@@ -60,7 +54,7 @@ const ProductListing = () => {
       case "discount-high": list = [...list].sort((a, b) => b.discount - a.discount); break;
     }
     return list;
-  }, [rawProducts, category, subcategory, sortValue, filters, query]);
+  }, [rawProducts, sortValue, filters]);
 
   const rawTitle = query ? `"${query}"` : (subcategory || category || "All Products");
   const title = typeof rawTitle === "string" ? rawTitle.replace(/-/g, " ") : rawTitle;
@@ -101,17 +95,11 @@ const ProductListing = () => {
         <div className="flex items-center justify-between px-4 md:px-0 py-3 md:py-0 md:mb-6">
           <p className="md:hidden text-[13px] text-muted-foreground">{filtered.length} items</p>
           <div className="flex items-center gap-2 ml-auto">
-            <button
-              onClick={() => setSortOpen(true)}
-              className="flex items-center gap-1.5 rounded-full bg-card border border-border px-4 py-2 text-[13px] font-medium text-foreground active:scale-95 transition-transform hover:bg-secondary"
-            >
+            <button onClick={() => setSortOpen(true)} className="flex items-center gap-1.5 rounded-full bg-card border border-border px-4 py-2 text-[13px] font-medium text-foreground active:scale-95 transition-transform hover:bg-secondary">
               <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.8} />
               Sort
             </button>
-            <button
-              onClick={() => setFilterOpen(true)}
-              className="flex items-center gap-1.5 rounded-full bg-card border border-border px-4 py-2 text-[13px] font-medium text-foreground active:scale-95 transition-transform hover:bg-secondary"
-            >
+            <button onClick={() => setFilterOpen(true)} className="flex items-center gap-1.5 rounded-full bg-card border border-border px-4 py-2 text-[13px] font-medium text-foreground active:scale-95 transition-transform hover:bg-secondary">
               <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.8} />
               Filter
             </button>
@@ -129,11 +117,7 @@ const ProductListing = () => {
         {!loading && (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 px-4 md:px-0">
             {filtered.map((p, i) => (
-              <div
-                key={p.id}
-                className="animate-fade-up"
-                style={{ animationDelay: `${Math.min(i * 40, 400)}ms` }}
-              >
+              <div key={p.id} className="animate-fade-up" style={{ animationDelay: `${Math.min(i * 40, 400)}ms` }}>
                 <ProductCard product={p} />
               </div>
             ))}
