@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "@/components/auth/AuthLayout";
 import AuthInput from "@/components/auth/AuthInput";
 import AuthButton from "@/components/auth/AuthButton";
-import { signup } from "@/services/authService";
+import { signup as signupUser } from "@/services/authService";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const mobileRegex = /^[0-9]{10}$/;
@@ -44,11 +44,12 @@ const Signup = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!validate()) return;
     setLoading(true);
     setErrors({});
     try {
-      await signup({
+      await signupUser({
         fullname: form.fullname.trim(),
         emailid: form.emailid.trim(),
         mobilenumber: form.mobilenumber.trim(),

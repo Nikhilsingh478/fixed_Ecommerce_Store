@@ -35,11 +35,12 @@ export const signup = async (payload: {
   userroleid?: number;
 }) => {
   const response = await apiClient.post("/signup", payload, {
+    skipAuth: true,
     headers: {
       emailId: payload.emailid,
       password: payload.password,
     },
-  });
+  } as any);
   return response.data;
 };
 

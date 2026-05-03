@@ -8,6 +8,11 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  const skipAuth = (config as any).skipAuth;
+  if (skipAuth) {
+    return config;
+  }
+
   const emailId = localStorage.getItem("emailId");
   const password = localStorage.getItem("password");
 

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "@/components/auth/AuthLayout";
 import AuthInput from "@/components/auth/AuthInput";
 import AuthButton from "@/components/auth/AuthButton";
-import api from "@/services/apiClient";
+import { login as loginUser } from "@/services/authService";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -25,24 +25,14 @@ const Login = () => {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     console.log("Login clicked");
     if (!validate()) return;
     setLoading(true);
     setErrors({});
     try {
-      const response = await api.post("/login", null, {
-        headers: {
-          emailId: email.trim(),
-          password,
-        },
-      });
-
-      console.log("Login API response:", response.data);
-
-      localStorage.setItem("emailId", email.trim());
-      localStorage.setItem("password", password);
-      localStorage.setItem("user", JSON.stringify(response.data));
-
+      const user = await loginUser(email.trim(), password);
+      console.log("Login API response:", user);
       navigate("/", { replace: true });
     } catch (error) {
       console.error("Login failed:", error);
