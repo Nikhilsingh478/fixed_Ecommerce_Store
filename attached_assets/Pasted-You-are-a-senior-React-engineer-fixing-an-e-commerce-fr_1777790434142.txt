@@ -1,0 +1,159 @@
+You are a senior React engineer fixing an e-commerce frontend.
+
+CRITICAL REQUIREMENT:
+The application must be 100% dynamic.
+NO hardcoded data is allowed anywhere in the codebase.
+
+---
+
+# 🚨 CURRENT PROBLEM
+
+The app STILL contains hardcoded UI data such as:
+
+* Popular brands section (Tata, Amul, Parle, etc.)
+* Possibly fallback/mock product arrays
+* Static category or banner data
+
+This is unacceptable.
+
+---
+
+# 🎯 OBJECTIVE
+
+Make the ENTIRE store frontend fully backend-driven.
+
+After this change:
+
+* If backend returns nothing → UI should be empty or show loading
+* NO fallback data should exist
+* NO static arrays should exist
+
+---
+
+# 🔧 TASKS (DO ALL)
+
+---
+
+## 1. REMOVE ALL HARDCODED DATA (STRICT)
+
+Search entire codebase for:
+
+* const brands = [...]
+* const products = [...]
+* const categories = [...]
+* any static JSON or arrays
+
+REMOVE ALL OF THEM.
+
+If UI depends on them:
+→ Replace with dynamic API data
+→ OR show loading state
+
+---
+
+## 2. FIX POPULAR BRANDS SECTION
+
+Currently it is hardcoded.
+
+Tasks:
+
+* REMOVE hardcoded brand list completely
+* Replace with:
+
+  * Either backend-driven brands
+  * OR hide section if API not available
+
+NO static brand names allowed.
+
+---
+
+## 3. REMOVE FALLBACK LOGIC
+
+Delete any code like:
+
+if (!data) return mockData;
+
+OR
+
+const data = apiData || dummyData;
+
+This must NOT exist.
+
+---
+
+## 4. ENSURE ALL UI USES API HOOKS
+
+Verify:
+
+* Home page → uses API data
+* Product listing → uses useProducts()
+* Categories → from backend only
+* Cart → from backend only
+
+---
+
+## 5. ADD LOADING STATES
+
+Where data is not yet available:
+
+Show:
+
+* "Loading..." spinner
+* OR empty UI
+
+NOT dummy data.
+
+---
+
+## 6. ADD DEBUG LOGGING
+
+Temporarily log:
+
+console.log("API products:", products);
+console.log("Categories:", categories);
+
+This ensures data is actually coming from backend.
+
+---
+
+## 7. VERIFY CLEAN STATE
+
+After changes:
+
+* No static UI content should appear
+* If backend fails → UI should be empty
+* Network tab should control EVERYTHING
+
+---
+
+# 🚫 STRICT RULES
+
+DO NOT:
+
+* Add mock data
+* Add fallback arrays
+* Hardcode images or text
+* Keep "sample" or "demo" content
+
+---
+
+# ✅ FINAL EXPECTED BEHAVIOR
+
+1. App loads → login required
+2. After login → API calls trigger
+3. UI renders ONLY backend data
+4. If backend returns empty → UI is empty
+
+---
+
+# 🎯 GOAL
+
+Convert this app from:
+"fake UI with dummy data"
+
+TO:
+"real UI fully controlled by backend"
+
+No exceptions.
+
+Output updated files with clean code.

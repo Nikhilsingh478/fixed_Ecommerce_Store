@@ -4,7 +4,6 @@ import Carousel from "@/components/Carousel/Carousel";
 import SectionGrid from "@/components/SectionGrid/SectionGrid";
 import { useCategories } from "@/hooks/useCategories";
 import { useSubCategories } from "@/hooks/useSubCategories";
-import { brands } from "@/data/brands";
 import { getProductImage } from "@/utils/imageHelper";
 
 import banner1 from "@/assets/banner1.webp";
@@ -47,21 +46,6 @@ const Home = () => {
           {categories.map((cat: any, idx: number) => (
             <CategorySection key={cat.primaryCategoryId} category={cat} idx={idx} />
           ))}
-
-          <div
-            className="animate-fade-up"
-            style={{ animationDelay: `${categories.length * 50}ms` }}
-          >
-            <SectionGrid
-              title="Popular Brands"
-              items={brands.map((b) => ({
-                id: b.id,
-                name: b.name,
-                image: b.image,
-                link: `/category/${b.id}`,
-              }))}
-            />
-          </div>
         </div>
       </main>
 
